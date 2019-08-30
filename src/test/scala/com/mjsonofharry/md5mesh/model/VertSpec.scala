@@ -1,17 +1,19 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
+import atto._, Atto._
+import cats.implicits._
 import atto.ParseResult.Done
 
 class VertSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
-  val vert = "	vert 18 0.004956 0.823437 38 2"
+  val VERT = "	vert 18 0.004956 0.823437 38 2"
 
   "the vert parser" should "successfully parse a vert" in {
     Given("a vert")
-    val v = vert
+    val vert = VERT
 
     When("the vert is parsed")
-    val result = Vert.parse(v)
+    val result = Vert.parser.parseOnly(vert)
 
     Then("a vert object should be constructed")
     result should matchPattern { case Done(_: String, _: Vert) => }

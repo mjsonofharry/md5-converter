@@ -40,6 +40,4 @@ object Bone {
       ))
     } | { char('}') >| Option.empty[String] }
   } yield Bone(index, name, bindpos, bindmat, parent)
-
-  def parse(b: String): ParseResult[Bone] = parser parseOnly (b)
 }

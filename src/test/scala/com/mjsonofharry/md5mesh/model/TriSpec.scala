@@ -1,17 +1,19 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
+import atto._, Atto._
+import cats.implicits._
 import atto.ParseResult.Done
 
 class TriSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
-  val tri = "	tri 45 25 38 44"
+  val TRI = "	tri 45 25 38 44"
 
   "the tri parser" should "successfully parse a tri" in {
     Given("a tri")
-    val t = tri
+    val tri = TRI
 
     When("the tri is parsed")
-    val result = Tri.parse(t)
+    val result = Tri.parser.parseOnly(tri)
 
     Then("a tri object should be constructed")
     result should matchPattern { case Done(_: String, _: Tri) => }

@@ -21,6 +21,4 @@ object Vert {
     weightStart <- int <~ spaceChar
     weightCount <- int
   } yield Vert(index, u, v, weightStart, weightCount)
-
-  def parse(v: String): ParseResult[Vert] = parser.parseOnly(v)
 }

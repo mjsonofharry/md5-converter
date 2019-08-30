@@ -22,6 +22,4 @@ object Weight {
     z <- double
     position = Vector3(x, y, z)
   } yield Weight(index, jointIndex, bias, position)
-
-  def parse(w: String): ParseResult[Weight] = parser.parseOnly(w)
 }

@@ -1,17 +1,19 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
+import atto._, Atto._
+import cats.implicits._
 import atto.ParseResult.Done
 
 class WeightSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
-  val weight = "	weight 20 38 0.388059 1.915334 -1.046617 0.109413"
+  val WEIGHT = "	weight 20 38 0.388059 1.915334 -1.046617 0.109413"
 
   "the weight parser" should "successfully parse a weight" in {
     Given("a weight")
-    val w = weight
+    val weight = WEIGHT
 
     When("the weight is parsed")
-    val result = Weight.parse(w)
+    val result = Weight.parser.parseOnly(weight)
 
     Then("a weight object should be constructed")
     result should matchPattern { case Done(_: String, _: Weight) => }

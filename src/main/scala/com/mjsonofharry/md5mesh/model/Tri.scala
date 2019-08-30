@@ -17,6 +17,4 @@ object Tri {
     v2 <- int <~ spaceChar
     v3 <- int <~ whitespaces
   } yield Tri(index, (v1, v2, v3))
-
-  def parse(t: String): ParseResult[Tri] = parser.parseOnly(t)
 }

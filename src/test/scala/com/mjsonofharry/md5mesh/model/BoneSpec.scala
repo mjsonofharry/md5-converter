@@ -1,17 +1,19 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
+import atto._, Atto._
+import cats.implicits._
 import atto.ParseResult.Done
 
 class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
-  val origin =
+  val ORIGIN =
     """bone 0 {
 	name "origin"
 	bindpos 0.000000 0.000000 0.000000
 	bindmat 0.000000 1.000000 0.000000 -1.000000 0.000000 0.000000 0.000000 0.000000 1.000000
 }"""
 
-  val body =
+  val BODY =
     """bone 1 {
 	name "Body2"
 	bindpos 0.217826 0.000000 51.499458
@@ -21,10 +23,10 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
 
   "the bone parser" should "successfully parse a bone that has no parent" in {
     Given("a bone without a parent")
-    val b = origin
+    val bone = ORIGIN
 
     When("the bone is parsed")
-    val result = Bone.parse(b)
+    val result = Bone.parser.parseOnly(bone)
 
     Then("a bone object should be constructed")
     result should matchPattern { case Done(_: String, _: Bone) => }
@@ -47,10 +49,10 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
 
   it should "successfully parse a bone that has a parent" in {
     Given("a bone with a parent")
-    val b = body
+    val bone = BODY
 
     When("the bone is parsed")
-    val result = Bone.parse(b)
+    val result = Bone.parser.parseOnly(bone)
 
     Then("a bone object should be constructed")
     result should matchPattern { case Done(input: String, bone: Bone) => }
