@@ -1,2 +1,6 @@
 *.class
 *.log
+*.md5mesh
+*.md5anim
+*.tga
+target/
