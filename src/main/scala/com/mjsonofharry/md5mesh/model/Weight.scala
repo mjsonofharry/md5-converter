@@ -3,25 +3,25 @@ package com.mjsonofharry.md5mesh.model
 import atto._, Atto._
 import cats.implicits._
 
+import Utils._
+
 case class Weight(
     index: Int,
     jointIndex: Int,
     bias: Double,
-    x: Double,
-    y: Double,
-    z: Double
+    position: Vector3
 )
 
 object Weight {
   val parser: Parser[Weight] = for {
-    label <- many(whitespace) ~> string("weight") <~ spaceChar
-    index <- int <~ spaceChar
+    index <- whitespaces ~ string("weight") ~ spaceChar ~> int <~ spaceChar
     jointIndex <- int <~ spaceChar
     bias <- double <~ spaceChar
     x <- double <~ spaceChar
     y <- double <~ spaceChar
     z <- double
-  } yield Weight(index, jointIndex, bias, x, y, z)
+    position = Vector3(x, y, z)
+  } yield Weight(index, jointIndex, bias, position)
 
   def parse(w: String): ParseResult[Weight] = parser.parseOnly(w)
 }

@@ -1,7 +1,7 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
-import atto.ParseResult.{Done, Fail, Partial}
+import atto.ParseResult.Done
 
 class VertSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
   val vert = "	vert 18 0.004956 0.823437 38 2"

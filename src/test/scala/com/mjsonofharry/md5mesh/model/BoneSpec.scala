@@ -1,7 +1,7 @@
 package com.mjsonofharry.md5mesh.model
 
 import org.scalatest._
-import atto.ParseResult.{Done, Fail, Partial}
+import atto.ParseResult.Done
 
 class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
   val origin =
