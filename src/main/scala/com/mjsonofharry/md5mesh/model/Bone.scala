@@ -18,7 +18,7 @@ case class Bone(
 )
 
 object Bone {
-  val Parser: Parser[Bone] = for {
+  val parser: Parser[Bone] = for {
     index <- string("bone") ~ spaceChar ~> int <~ spaceChar <~ char('{') ~ many(
       whitespace
     )
@@ -51,5 +51,5 @@ object Bone {
     } | { char('}') >| Option.empty[String] }
   } yield Bone(index, name, bindpos, bindmat, parent)
 
-  def parse(b: String) = Parser parseOnly (b)
+  def parse(b: String): ParseResult[Bone] = parser parseOnly (b)
 }
