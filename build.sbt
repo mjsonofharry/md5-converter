@@ -8,6 +8,7 @@ resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
 
 libraryDependencies += "org.tpolecat" %% "atto-core"    % "0.6.5"
 libraryDependencies += "org.tpolecat" %% "atto-refined" % "0.6.5"
+libraryDependencies += "org.scalanlp" %% "breeze" % "1.0"
 libraryDependencies += "org.scalactic" %% "scalactic" % "3.0.8"
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "test"
 

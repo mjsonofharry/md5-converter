@@ -25,14 +25,16 @@ class WeightSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
               index: Int,
               jointIndex: Int,
               bias: Double,
-              position: Vector3
+              position: List[Double]
               ) => {
             index shouldBe 20
             jointIndex shouldBe 38
             bias shouldBe 0.388059
-            position.x shouldBe 1.915334
-            position.y shouldBe -1.046617
-            position.z shouldBe 0.109413
+            position should contain theSameElementsInOrderAs List(
+              1.915334,
+              -1.046617,
+              0.109413
+            )
           }
         }
     }

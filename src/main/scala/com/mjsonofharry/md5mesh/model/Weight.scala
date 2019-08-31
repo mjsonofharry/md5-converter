@@ -3,13 +3,13 @@ package com.mjsonofharry.md5mesh.model
 import atto._, Atto._
 import cats.implicits._
 
-import Utils._
+import ParsingUtils._
 
 case class Weight(
     index: Int,
     jointIndex: Int,
     bias: Double,
-    position: Vector3
+    position: List[Double]
 )
 
 object Weight {
@@ -20,6 +20,6 @@ object Weight {
     x <- double <~ spaceChar
     y <- double <~ spaceChar
     z <- double
-    position = Vector3(x, y, z)
+    position = List(x, y, z)
   } yield Weight(index, jointIndex, bias, position)
 }

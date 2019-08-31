@@ -6,7 +6,7 @@ import cats.implicits._
 import Vert._
 import Tri._
 import Weight._
-import Utils._
+import ParsingUtils._
 
 case class Mesh(
     index: Int,

@@ -21,9 +21,9 @@ class TriSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
     inside(result) {
       case Done(_: String, tri: Tri) =>
         inside(tri) {
-          case Tri(index: Int, verts: (Int, Int, Int)) => {
+          case Tri(index: Int, verts: List[Int]) => {
             index shouldBe 45
-            verts shouldBe (25, 38, 44)
+            verts should contain theSameElementsInOrderAs List(25, 38, 44)
           }
         }
     }

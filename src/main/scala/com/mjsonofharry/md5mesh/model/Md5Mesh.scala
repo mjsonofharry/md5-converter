@@ -3,7 +3,7 @@ package com.mjsonofharry.md5mesh.model
 import atto._, Atto._
 import cats.implicits._
 
-import Utils._
+import ParsingUtils._
 
 case class Md5Mesh(
     commandline: String,

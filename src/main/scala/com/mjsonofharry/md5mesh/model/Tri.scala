@@ -3,11 +3,11 @@ package com.mjsonofharry.md5mesh.model
 import atto._, Atto._
 import cats.implicits._
 
-import Utils._
+import ParsingUtils._
 
 case class Tri(
     index: Int,
-    verts: (Int, Int, Int)
+    verts: List[Int]
 )
 
 object Tri {
@@ -16,5 +16,6 @@ object Tri {
     v1 <- int <~ spaceChar
     v2 <- int <~ spaceChar
     v3 <- int <~ whitespaces
-  } yield Tri(index, (v1, v2, v3))
+    verts = List(v1, v2, v3)
+  } yield Tri(index, verts)
 }
