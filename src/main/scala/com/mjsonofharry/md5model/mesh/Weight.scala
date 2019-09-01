@@ -1,9 +1,9 @@
-package com.mjsonofharry.md5mesh.model
+package com.mjsonofharry.md5model.mesh
 
 import atto._, Atto._
 import cats.implicits._
 
-import ParsingUtils._
+import com.mjsonofharry.md5model.utils.Utils._
 
 case class Weight(
     index: Int,

@@ -1,10 +1,10 @@
-package com.mjsonofharry.md5mesh.model
+package com.mjsonofharry.md5model.mesh
 
 import atto._, Atto._
 import cats.implicits._
 
-import com.mjsonofharry.md5mesh.converter.Quaternion
-import ParsingUtils._
+import com.mjsonofharry.md5model.math.Quaternion
+import com.mjsonofharry.md5model.utils.Utils._
 
 case class Bone(
     index: Int,
@@ -21,8 +21,8 @@ object Bone {
     )
   } yield parent
   val parser: Parser[Bone] = for {
-    index <- string("bone") ~ spaceChar ~> int <~ spaceChar <~ char('{') ~ whitespaces
-    name <- string("name") ~ spaceChar ~> inQuotes <~ whitespaces map (_.mkString)
+    index <- keyValue("bone", int) <~ char('{') ~ whitespaces
+    name <- keyValue("name", inQuotes) map (_.mkString)
     x <- string("bindpos") ~ spaceChar ~> double <~ spaceChar
     y <- double <~ spaceChar
     z <- double <~ whitespaces

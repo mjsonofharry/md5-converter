@@ -1,13 +1,13 @@
-package com.mjsonofharry.md5mesh.model
+package com.mjsonofharry.md5model.mesh
 
 import atto._, Atto._
 import atto.ParseResult.Done
 import cats.implicits._
 
+import com.mjsonofharry.md5model.utils.Utils._
 import Vert._
 import Tri._
 import Weight._
-import ParsingUtils._
 
 case class Mesh(
     index: Int,
@@ -31,13 +31,13 @@ object Mesh {
     ) map (_.mkString)
   } yield name
   val parser: Parser[Mesh] = for {
-    index <- string("mesh") ~ spaceChar ~> int <~ spaceChar ~ char('{') ~ whitespaces
-    shader <- string("shader") ~ spaceChar ~> inQuotes <~ whitespaces
-    numverts <- string("numverts") ~ spaceChar ~> int <~ whitespaces
+    index <- keyValue("mesh", int) <~ char('{') ~ whitespaces
+    shader <- keyValue("shader", inQuotes)
+    numverts <- keyValue("numverts", int)
     verts <- many(Vert.parser <~ whitespaces) <~ whitespaces
-    numtris <- string("numtris") ~ spaceChar ~> int <~ whitespaces
+    numtris <- keyValue("numtris", int)
     tris <- many(Tri.parser <~ whitespaces) <~ whitespaces
-    numweights <- string("numweights") ~ spaceChar ~> int <~ whitespaces
+    numweights <- keyValue("numweights", int)
     weights <- many(Weight.parser <~ whitespaces) <~ whitespaces <~ char('}')
   } yield
     Mesh(index, shader, numverts, numtris, numweights, verts, tris, weights)

@@ -1,4 +1,4 @@
-package com.mjsonofharry.md5mesh.model
+package com.mjsonofharry.md5model.mesh
 
 import org.scalatest._
 import atto._, Atto._

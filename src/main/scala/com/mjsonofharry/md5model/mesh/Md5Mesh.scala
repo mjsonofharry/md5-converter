@@ -1,10 +1,9 @@
-package com.mjsonofharry.md5mesh.model
+package com.mjsonofharry.md5model.mesh
 
 import atto._, Atto._
 import cats.implicits._
 
-import ParsingUtils._
-import scala.collection.script.Message
+import com.mjsonofharry.md5model.utils.Utils._
 
 case class Md5Mesh(
     commandline: String,
@@ -16,10 +15,13 @@ case class Md5Mesh(
 
 object Md5Mesh {
   val parser: Parser[Md5Mesh] = for {
-    commandline <- string("MD5Version 6") ~ whitespaces ~ string("commandline") ~> spaceChar ~> inQuotes <~ whitespaces
-    numbones <- string("numbones") ~ spaceChar ~> int <~ whitespaces
+    commandline <- string("MD5Version 6") ~ whitespaces ~> keyValue(
+      "commandline",
+      inQuotes
+    )
+    numbones <- keyValue("numbones", int)
     bones <- many(Bone.parser <~ whitespaces)
-    nummeshes <- string("nummeshes") ~ spaceChar ~> int <~ whitespaces
+    nummeshes <- keyValue("nummeshes", int)
     meshes <- many(Mesh.parser <~ whitespaces)
   } yield Md5Mesh(commandline, numbones, nummeshes, bones, meshes)
 

@@ -1,4 +1,4 @@
-package com.mjsonofharry.md5mesh.converter
+package com.mjsonofharry.md5model.converter
 
 import scala.io.Source
 import java.io.{File, PrintWriter}
@@ -6,7 +6,7 @@ import atto._, Atto._
 import cats.implicits._
 import atto.ParseResult.Done
 
-import com.mjsonofharry.md5mesh.model.Md5Mesh
+import com.mjsonofharry.md5model.mesh.Md5Mesh
 
 object Md5MeshConverter {
   def main(args: Array[String]): Unit = {

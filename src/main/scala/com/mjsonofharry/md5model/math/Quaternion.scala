@@ -1,4 +1,4 @@
-package com.mjsonofharry.md5mesh.converter
+package com.mjsonofharry.md5model.math
 
 import breeze.linalg._
 
