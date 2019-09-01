@@ -16,8 +16,8 @@ This is still early in development but jars are on the way. For now:
 
 ## Notice
 
- - The rotation matrix to quaternion conversion function in [Quaternion.scala](src\main\scala\com\mjsonofharry\md5model\math\Quaternion.scala) is a port of the [NiPy implementation](https://github.com/nipy/nibabel/blob/master/nibabel/quaternions.py).
- - The entirety of [Eig.scala](src\main\scala\com\mjsonofharry\md5model\math\Eig.scala) is modified from [Breeze](https://github.com/scalanlp/breeze/blob/master/math/src/main/scala/breeze/linalg/functions/eig.scala).
+ - The rotation matrix to quaternion conversion function in [Quaternion.scala](src/main/scala/com/mjsonofharry/md5model/math/Quaternion.scala) is a port of the [NiPy implementation](https://github.com/nipy/nibabel/blob/master/nibabel/quaternions.py).
+ - The entirety of [Eig.scala](src/main/scala/com/mjsonofharry/md5model/math/Eig.scala) is modified from [Breeze](https://github.com/scalanlp/breeze/blob/master/math/src/main/scala/breeze/linalg/functions/eig.scala).
 
 ## Reference
 
