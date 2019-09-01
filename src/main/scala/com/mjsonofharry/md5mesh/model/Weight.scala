@@ -22,4 +22,9 @@ object Weight {
     z <- double
     position = List(x, y, z)
   } yield Weight(index, jointIndex, bias, position)
+
+  def convert(weight: Weight) = {
+    val List(x, y, z): List[String] = weight.position.map(format)
+    s"weight ${weight.index} ${weight.jointIndex} ${weight.bias} ( ${x} ${y} ${z} )"
+  }
 }

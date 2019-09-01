@@ -37,9 +37,10 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
           case Bone(index, name, bindpos, bindmat, parent) => {
             index shouldBe 0
             name shouldBe "origin"
-            bindpos should contain theSameElementsInOrderAs List(0, 0, 0)
-            bindmat should contain theSameElementsInOrderAs List(0, 1, 0, -1, 0,
-              0, 0, 0, 1)
+            val p = List(0, 0, 0)
+            bindpos should contain theSameElementsInOrderAs p
+            val m = List(0, 1, 0, -1, 0, 0, 0, 0, 1)
+            bindmat should contain theSameElementsInOrderAs m
             parent shouldBe None
           }
         }
@@ -62,13 +63,10 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
           case Bone(index, name, bindpos, bindmat, parent) => {
             index shouldBe 1
             name shouldBe "Body2"
-            bindpos should contain theSameElementsInOrderAs List(
-              0.217826,
-              0,
-              51.499458
-            )
-            bindmat should contain theSameElementsInOrderAs List(0, 1, 0, 0, 0,
-              1, 1, 0, 0)
+            val p = List(0.217826, 0, 51.499458)
+            bindpos should contain theSameElementsInOrderAs p
+            val m = List(0, 1, 0, 0, 0, 1, 1, 0, 0)
+            bindmat should contain theSameElementsInOrderAs m
             parent should contain("origin")
           }
         }

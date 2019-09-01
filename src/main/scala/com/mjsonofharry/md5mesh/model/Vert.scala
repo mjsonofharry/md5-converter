@@ -21,4 +21,7 @@ object Vert {
     weightStart <- int <~ spaceChar
     weightCount <- int
   } yield Vert(index, u, v, weightStart, weightCount)
+
+  def convert(vert: Vert): String =
+    s"vert ${vert.index} ( ${format(vert.u)} ${format(vert.v)} ) ${vert.weightStart} ${vert.weightCount}"
 }

@@ -1,6 +1,7 @@
 package com.mjsonofharry.md5mesh.converter
 
 import scala.io.Source
+import java.io.{File, PrintWriter}
 import atto._, Atto._
 import cats.implicits._
 import atto.ParseResult.Done
@@ -12,13 +13,17 @@ object Md5MeshConverter {
     val source = args(0)
     val destination = args(1)
 
-    println(s"Reading: '${source}'")
-    val data = Source.fromFile(source).getLines.mkString
+    val data: String = Source.fromFile(source).getLines.mkString
 
-    val result = Md5Mesh.parser.parseOnly(data)
-    result match {
-      case Done(input, result) => println("Success!")
-      case _ => println(result)
+    val parseResult: ParseResult[Md5Mesh] = Md5Mesh.parser.parseOnly(data)
+
+    parseResult match {
+      case Done(_, md5Mesh: Md5Mesh) => {
+        val output = new PrintWriter(new File(destination))
+        output.write(Md5Mesh.convert(md5Mesh))
+        output.close
+      }
+      case _ => println(s"Failed to parse md5mesh read from '${source}'")
     }
   }
 }

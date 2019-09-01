@@ -4,3 +4,5 @@
 *.md5anim
 *.tga
 target/
+.bloop
+.metals

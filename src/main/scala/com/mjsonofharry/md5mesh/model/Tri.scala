@@ -18,4 +18,9 @@ object Tri {
     v3 <- int <~ whitespaces
     verts = List(v1, v2, v3)
   } yield Tri(index, verts)
+
+  def convert(tri: Tri): String = {
+    val List(v1, v2, v3): List[Int] = tri.verts
+    s"tri ${tri.index} ${v1} ${v2} ${v3}"
+  }
 }
