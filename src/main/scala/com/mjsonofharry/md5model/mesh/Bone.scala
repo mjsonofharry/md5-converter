@@ -18,20 +18,8 @@ object Bone {
   val parser: Parser[Bone] = for {
     index <- keyValue("bone", int) <~ char('{') ~ whitespaces
     name <- keyValue("name", inQuotes) map (_.mkString)
-    x <- string("bindpos") ~ spaceChar ~> double <~ spaceChar
-    y <- double <~ spaceChar
-    z <- double <~ whitespaces
-    bindpos = List(x, y, z)
-    m00 <- string("bindmat") ~ spaceChar ~> double <~ spaceChar
-    m01 <- double <~ spaceChar
-    m02 <- double <~ spaceChar
-    m10 <- double <~ spaceChar
-    m11 <- double <~ spaceChar
-    m12 <- double <~ spaceChar
-    m20 <- double <~ spaceChar
-    m21 <- double <~ spaceChar
-    m22 <- double <~ whitespaces
-    bindmat = List(m00, m01, m02, m10, m11, m12, m20, m21, m22)
+    bindpos <- keyValue("bindpos", vector(3, double))
+    bindmat <- keyValue("bindmat", vector(9, double))
     parent <- { keyValue("parent", inQuotes) <~ char('}') map (Some(_)) } | {
       char('}') >| Option.empty[String]
     }

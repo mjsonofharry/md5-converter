@@ -13,10 +13,7 @@ case class Tri(
 object Tri {
   val parser: Parser[Tri] = for {
     index <- whitespaces ~ string("tri") ~ spaceChar ~> int <~ spaceChar
-    v1 <- int <~ spaceChar
-    v2 <- int <~ spaceChar
-    v3 <- int <~ whitespaces
-    verts = List(v1, v2, v3)
+    verts <- vector(3, int)
   } yield Tri(index, verts)
 
   def convert(tri: Tri): String = {

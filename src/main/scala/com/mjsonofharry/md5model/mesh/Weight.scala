@@ -17,10 +17,7 @@ object Weight {
     index <- whitespaces ~ string("weight") ~ spaceChar ~> int <~ spaceChar
     jointIndex <- int <~ spaceChar
     bias <- double <~ spaceChar
-    x <- double <~ spaceChar
-    y <- double <~ spaceChar
-    z <- double
-    position = List(x, y, z)
+    position <- vector(3, double)
   } yield Weight(index, jointIndex, bias, position)
 
   def convert(weight: Weight) = {
