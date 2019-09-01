@@ -15,11 +15,6 @@ case class Bone(
 )
 
 object Bone {
-  private val parentParser = for {
-    parent <- string("parent") ~ spaceChar ~> inQuotes <~ whitespaces ~ char(
-      '}'
-    )
-  } yield parent
   val parser: Parser[Bone] = for {
     index <- keyValue("bone", int) <~ char('{') ~ whitespaces
     name <- keyValue("name", inQuotes) map (_.mkString)
@@ -37,7 +32,7 @@ object Bone {
     m21 <- double <~ spaceChar
     m22 <- double <~ whitespaces
     bindmat = List(m00, m01, m02, m10, m11, m12, m20, m21, m22)
-    parent <- { parentParser map (Some(_)) } | {
+    parent <- { keyValue("parent", inQuotes) <~ char('}') map (Some(_)) } | {
       char('}') >| Option.empty[String]
     }
   } yield Bone(index, name, bindpos, bindmat, parent)
