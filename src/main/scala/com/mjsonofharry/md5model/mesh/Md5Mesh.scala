@@ -9,7 +9,7 @@ case class Md5Mesh(
     commandline: String,
     numbones: Int,
     nummeshes: Int,
-    bones: List[Bone],
+    joints: List[Joint],
     meshes: List[Mesh]
 )
 
@@ -21,21 +21,22 @@ object Md5Mesh {
     )
     numbones <- keyValue("numbones", int)
     bones <- many(Bone.parser <~ whitespaces)
+    boneTable = bones.map((b: Bone) => (b.name, b.index)).toMap
+    joints = bones.map(Joint(_, boneTable))
     nummeshes <- keyValue("nummeshes", int)
     meshes <- many(Mesh.parser <~ whitespaces)
-  } yield Md5Mesh(commandline, numbones, nummeshes, bones, meshes)
+  } yield Md5Mesh(commandline, numbones, nummeshes, joints, meshes)
 
   def convert(md5Mesh: Md5Mesh): String = {
     val version = "MD5Version 10\n"
     val commandline = s"commandline ${quotate(md5Mesh.commandline)}\n\n"
     val numJoints = s"numJoints ${md5Mesh.numbones}\n"
     val numMeshes = s"numMeshes ${md5Mesh.nummeshes}\n\n"
-    val boneTable = md5Mesh.bones.map((b: Bone) => (b.name, b.index)).toMap
-    val joints = md5Mesh.bones
-      .map(Bone.convert(_, boneTable))
+    val jointBlock = md5Mesh.joints
+      .map(Joint.convert)
       .mkString(start = "joints {\n\t", sep = "\n\t", end = "\n}\n\n")
-    val meshes = md5Mesh.meshes.map(Mesh.convert).mkString("\n")
+    val meshBlocks = md5Mesh.meshes.map(Mesh.convert).mkString("\n")
 
-    version + commandline + numJoints + numMeshes + joints + meshes
+    version + commandline + numJoints + numMeshes + jointBlock + meshBlocks
   }
 }

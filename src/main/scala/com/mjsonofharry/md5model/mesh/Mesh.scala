@@ -21,7 +21,7 @@ case class Mesh(
 )
 
 object Mesh {
-  val shaderParser: Parser[String] = for {
+  val minShaderParser: Parser[String] = for {
     path <- string("P:/Doom/base/") ~> manyUntil(anyChar, string(".tga")) map (_.mkString)
   } yield path
   val shaderNameParser: Parser[String] = for {
@@ -48,7 +48,7 @@ object Mesh {
       case _                       => ""
     }
     val comment = s"\t// meshes: ${shaderName}\n"
-    val minShader = shaderParser.parseOnly(mesh.shader) match {
+    val minShader = minShaderParser.parseOnly(mesh.shader) match {
       case Done(_, result: String) => result
       case _                       => ""
     }
