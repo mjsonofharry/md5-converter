@@ -25,15 +25,6 @@ object Bone {
     }
   } yield Bone(index, name, bindpos, bindmat, parent)
 
-  def convert(bone: Bone, boneTable: Map[String, Int]): String = {
-    val q: List[Double] = Quaternion.from_matrix(bone.bindmat)
-    val List(px, py, pz): List[String] = bone.bindpos.map(format)
-    val List(qx, qy, qz, qw): List[String] = q.map(format)
-
-    val position = s"( ${px} ${py} ${pz} )"
-    val orientation = s"( ${qx} ${qy} ${qz} )"
-    val parentName = bone.parent.getOrElse("")
-    val parentIndex = boneTable.getOrElse(parentName, -1)
-    s"${QUOTE}${bone.name}${QUOTE}\t${parentIndex} ${position} ${orientation}\t\t// ${parentName}"
-  }
+  def convert(bone: Bone, boneTable: Map[String, Int]): String =
+    Joint.convert(Joint(bone, boneTable))
 }

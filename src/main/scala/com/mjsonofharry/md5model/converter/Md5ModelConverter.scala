@@ -10,8 +10,8 @@ import com.mjsonofharry.md5model.mesh.Md5Mesh
 
 object Md5MeshConverter {
   def main(args: Array[String]): Unit = {
-    val source = args(0)
-    val destination = args(1)
+    val source = """D:\git\md5-converter\samples\alpha_pinky\animation\cycles\"""
+    val destination = """D:\git\md5-converter\output\alpha_pinky\"""
 
     val data: String = Source.fromFile(source).getLines.mkString
 
