@@ -41,7 +41,7 @@ class MeshSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
     val shader = "P:/Doom/base/models/monsters/zombie/commando/com1_d.tga"
 
     When("the shader path is parsed")
-    val result = Mesh.shaderParser.parseOnly(shader)
+    val result = Mesh.minShaderParser.parseOnly(shader)
 
     Then("the correct part of the shader path should be returned")
     result should matchPattern { case Done(input, result) => }
