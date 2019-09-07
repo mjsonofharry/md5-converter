@@ -33,8 +33,8 @@ import breeze.linalg._
  */
 
 object Quaternion {
-  def from_matrix(m: List[Double]): List[Double] = {
-    val List(xx, yx, zx, xy, yy, zy, xz, yz, zz): List[Double] = m
+  def from_matrix(matrix: List[Double]): List[Double] = {
+    val List(xx, yx, zx, xy, yy, zy, xz, yz, zz): List[Double] = matrix
 
     val k: DenseMatrix[Double] = DenseMatrix(
       (xx - yy - zz, 0.0, 0.0, 0.0),
@@ -47,5 +47,11 @@ object Quaternion {
     val q: List[Double] =
       e.eigenvectors(::, argmax(e.eigenvalues)).toArray.toList
     if (q.last < 0) q.map(_ * -1) else q
+  }
+
+  def from_axis_angle(theta: Double, vector: List[Double]): List[Double] = {
+    val t2 = theta / 2.0
+    val st2 = math.sin(t2)
+    vector.map(_ * st2) :+ math.cos(t2)
   }
 }
