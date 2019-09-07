@@ -7,7 +7,7 @@ import com.mjsonofharry.md5model.utils.Utils._
 
 case class Channel(
     index: Int,
-    joint: String,
+    jointName: String,
     attribute: String,
     starttime: Double,
     endtime: Double,
@@ -20,7 +20,7 @@ case class Channel(
 object Channel {
   val parser: Parser[Channel] = for {
     index <- keyValue("channel", int) <~ char('{') ~ whitespaces
-    joint <- keyValue("joint", inQuotes)
+    jointName <- keyValue("joint", inQuotes)
     attribute <- keyValue("attribute", inQuotes)
     starttime <- keyValue("starttime", double)
     endtime <- keyValue("endtime", double)
@@ -32,7 +32,7 @@ object Channel {
   } yield
     Channel(
       index,
-      joint,
+      jointName,
       attribute,
       starttime,
       endtime,

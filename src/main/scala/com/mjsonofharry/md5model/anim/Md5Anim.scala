@@ -25,31 +25,39 @@ object Md5Anim {
   val ROLL = List(1, 0, 0)
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh) = {
-    val jointTable = md5mesh.joints.map((j) => (j.name, j)).toMap
+    val joints: Map[String, Joint] =
+      md5mesh.joints.map((j) => (j.name, j)).toMap
 
-    val jointChannels = md5anim.channels.groupBy(_.joint).map {
-      case (j: String, cs: List[Channel]) =>
-        (jointTable(j), cs.filter(_.joint == j))
-    }
-
-    val startIndices = jointChannels.toList
+    val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
+      .groupBy(_.jointName)
+      .map {
+        case (jointName: String, channels: List[Channel]) =>
+          (joints(jointName), channels.filter(_.jointName == jointName))
+      }
+      .toList
       .sortBy(_._1.index)
+
+    val jointStartIndices: Map[String, Int] = jointChannels.toList
       .foldLeft((0, Nil: List[(String, Int)])) {
         case (
             (currentIndex: Int, acc: List[(String, Int)]),
             (joint: Joint, channels: List[Channel])
             ) =>
           (
-            currentIndex + channels.map(_.attribute).toSet.size,
+            currentIndex + channels
+              .filter(_.keys.size > 1)
+              .map(_.attribute)
+              .toSet
+              .size,
             acc :+ (joint.name, currentIndex)
           )
       }
       ._2
       .toMap
 
-    val hierarchy = jointChannels.map {
+    val jointHierarchies: List[Hierarchy] = jointChannels.map {
       case (joint: Joint, channels: List[Channel]) =>
-        Hierarchy(joint, channels, startIndices(joint.name))
+        Hierarchy(joint, channels, jointStartIndices(joint.name))
     }
   }
 }
