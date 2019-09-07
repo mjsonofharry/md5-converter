@@ -24,23 +24,30 @@ object Md5Anim {
   val YAW = List(0, 0, 1)
   val ROLL = List(1, 0, 0)
 
-  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh) = {
-    val joints: Map[String, Joint] =
+  val BOUNDS_MIN = "boundsMin"
+  val BOUNDS_MAX = "boundsMax"
+
+  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
+    val jointTable: Map[String, Joint] =
       md5mesh.joints.map((j) => (j.name, j)).toMap
 
-    val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
+    val groupedChannels: List[(String, List[Channel])] = md5anim.channels
       .groupBy(_.jointName)
+      .toList
+
+    val hierarchy: List[Hierarchy] = groupedChannels
+      .filterNot {
+        case (jointName: String, _) =>
+          List(BOUNDS_MIN, BOUNDS_MAX).contains(jointName)
+      }
       .map {
         case (jointName: String, channels: List[Channel]) =>
-          (joints(jointName), channels.filter(_.jointName == jointName))
+          (jointTable(jointName), channels.filter(_.jointName == jointName))
       }
-      .toList
       .sortBy(_._1.index)
-
-    val jointStartIndices: Map[String, Int] = jointChannels.toList
-      .foldLeft((0, Nil: List[(String, Int)])) {
+      .foldLeft((0, Nil: List[Hierarchy])) {
         case (
-            (currentIndex: Int, acc: List[(String, Int)]),
+            (currentIndex: Int, acc: List[Hierarchy]),
             (joint: Joint, channels: List[Channel])
             ) =>
           (
@@ -49,15 +56,17 @@ object Md5Anim {
               .map(_.attribute)
               .toSet
               .size,
-            acc :+ (joint.name, currentIndex)
+            acc :+ Hierarchy(joint, channels, currentIndex)
           )
       }
       ._2
-      .toMap
 
-    val jointHierarchies: List[Hierarchy] = jointChannels.map {
-      case (joint: Joint, channels: List[Channel]) =>
-        Hierarchy(joint, channels, jointStartIndices(joint.name))
-    }
+    val bounds = groupedChannels
+      .filter {
+        case (jointName: String, _) =>
+          List(BOUNDS_MIN, BOUNDS_MAX).contains(jointName)
+      }
+
+    ""
   }
 }
