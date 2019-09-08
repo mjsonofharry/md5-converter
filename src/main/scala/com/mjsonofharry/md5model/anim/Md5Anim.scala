@@ -28,58 +28,74 @@ object Md5Anim {
   val BOUNDS_MIN = "boundsMin"
   val BOUNDS_MAX = "boundsMax"
 
+  type Channels = List[Channel]
   type Keys = List[Double]
   type JointName = String
   type Attribute = String
 
-  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
-    val maxRange: Int = md5anim.channels.map(_.range._2).max
-    val jointTable: Map[JointName, Joint] =
-      md5mesh.joints.map((j) => (j.name, j)).toMap
-
-    val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
-      .filterNot((c) => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
+  def mapJointsToChannels(
+      channels: List[Channel],
+      joints: List[Joint]
+  ): List[(Joint, Channels)] = {
+    val jointTable: Map[JointName, Joint] = joints.map((j) => (j.name, j)).toMap
+    channels
+      .filterNot(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
       .groupBy(_.jointName)
       .toList
       .map((g) => (jointTable(g._1), g._2))
       .sortBy(_._1.index)
+  }
 
-    val hierarchy: List[Hierarchy] = jointChannels
-      .foldLeft((0, List.empty[Hierarchy])) {
-        case (
-            (i: Int, acc: List[Hierarchy]),
-            (joint: Joint, channels: List[Channel])
-            ) =>
-          (
-            i + channels
-              .filter(_.keys.size > 1)
-              .map(_.attribute)
-              .toSet
-              .size,
-            acc :+ Hierarchy(joint, channels, i)
-          )
-      }
+  def constructHierarchy(jointChannels: List[(Joint, Channels)]) =
+    jointChannels
+      .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
+        val (i: Int, others: List[Hierarchy]) = acc
+        val (joint: Joint, channels: List[Channel]) = next
+        val numAttributes = channels
+          .filter(_.keys.size > 1)
+          .map(_.attribute)
+          .toSet
+          .size
+        (i + numAttributes, others :+ Hierarchy(joint, channels, i))
+      })
       ._2
 
-    val boundChannels: List[(JointName, (Attribute, Keys))] = md5anim.channels
-      .filter((c) => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
-      .map {
-        case (channel: Channel) =>
-          (
-            channel.jointName,
-            (channel.attribute, padKeys(channel.keys, channel.range, maxRange))
-          )
-      }
+  def computeBounds(jointChannels: List[(Joint, Channels)]) = {
+    val channels = jointChannels.flatMap(_._2)
+    val maxRange: Int = channels.map(_.range._2).max
+    val boundChannels: List[(JointName, (Attribute, Keys))] = channels
+      .filter(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
+      .map(
+        c => (c.jointName, (c.attribute, padKeys(c.keys, c.range, maxRange)))
+      )
     val boundsMin = boundChannels.filter(_._1 == BOUNDS_MIN).map(_._2).toMap
     val boundsMax = boundChannels.filter(_._1 == BOUNDS_MAX).map(_._2).toMap
-    val bounds = List(
+    List(
       boundsMin("x"),
       boundsMin("y"),
       boundsMin("z"),
       boundsMax("x"),
       boundsMax("y"),
       boundsMax("z")
-    ).transpose
+    ).transpose.transpose.map(Bound(_))
+  }
+
+  def computeFrames(jointChannels: List[(Joint, Channels)]): List[Frame] =
+    jointChannels
+      .map(_._2.filter(_.keys.size > 1).map(_.keys))
+      .transpose
+      .zipWithIndex
+      .map { case (values: List[List[Double]], i: Int) => Frame(i, values) }
+
+  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
+    val jointChannels: List[(Joint, Channels)] =
+      mapJointsToChannels(md5anim.channels, md5mesh.joints)
+
+    val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels)
+
+    val bounds: List[Bound] = computeBounds(jointChannels)
+
+    val frames = computeFrames(jointChannels)
 
     ""
   }
