@@ -7,23 +7,37 @@ import cats.implicits._
 import atto.ParseResult.Done
 
 import com.mjsonofharry.md5model.mesh.Md5Mesh
+import com.mjsonofharry.md5model.anim.Md5Anim
 
 object Md5MeshConverter {
   def main(args: Array[String]): Unit = {
-    val source = """D:\git\md5-converter\samples\alpha_pinky\animation\cycles\"""
-    val destination = """D:\git\md5-converter\output\alpha_pinky\"""
+    val meshSource =
+      """D:\git\md5-converter\samples\alpha_pinky\animation\cycles\idle1.md5mesh"""
+    val meshDestination =
+      """D:\git\md5-converter\output\test.md5mesh"""
+    val meshData: String = Source.fromFile(meshSource).getLines.mkString
+    val meshParseResult: ParseResult[Md5Mesh] =
+      Md5Mesh.parser.parseOnly(meshData)
 
-    val data: String = Source.fromFile(source).getLines.mkString
+    val animSource =
+      """D:\git\md5-converter\samples\alpha_pinky\animation\cycles\idle1.md5anim"""
+    val animDestination =
+      """D:\git\md5-converter\output\test.md5anim"""
+    val animData: String = Source.fromFile(animSource).getLines.mkString
+    val animParseResult: ParseResult[Md5Anim] =
+      Md5Anim.parser.parseOnly(animData)
 
-    val parseResult: ParseResult[Md5Mesh] = Md5Mesh.parser.parseOnly(data)
+    (meshParseResult, animParseResult) match {
+      case (Done(_, md5Mesh: Md5Mesh), Done(_, md5anim: Md5Anim)) => {
+        val meshOutput = new PrintWriter(new File(meshDestination))
+        meshOutput.write(Md5Mesh.convert(md5Mesh))
+        meshOutput.close
 
-    parseResult match {
-      case Done(_, md5Mesh: Md5Mesh) => {
-        val output = new PrintWriter(new File(destination))
-        output.write(Md5Mesh.convert(md5Mesh))
-        output.close
+        val animOutput = new PrintWriter(new File(animDestination))
+        animOutput.write(Md5Anim.convert(md5anim, md5Mesh))
+        animOutput.close
       }
-      case _ => println(s"Failed to parse md5mesh read from '${source}'")
+      case _ => println(s"Failed to parse mesh or anim")
     }
   }
 }

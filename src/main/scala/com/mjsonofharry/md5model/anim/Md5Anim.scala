@@ -46,7 +46,9 @@ object Md5Anim {
       .sortBy(_._1.index)
   }
 
-  def constructHierarchy(jointChannels: List[(Joint, Channels)]) =
+  def constructHierarchy(
+      jointChannels: List[(Joint, Channels)]
+  ): List[Hierarchy] =
     jointChannels
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
         val (i: Int, others: List[Hierarchy]) = acc
@@ -95,8 +97,32 @@ object Md5Anim {
 
     val bounds: List[Bound] = computeBounds(jointChannels)
 
+    val baseFrame = Nil
+
     val frames = computeFrames(jointChannels)
 
-    ""
+    val version = "MD5Version 10\n"
+    val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"
+    val numFrames = s"numFrames ${frames.size}\n"
+    val numJoints = s"numJoints ${md5mesh.joints.size}\n"
+    val frameRate = s"frameRate ${md5anim.channels.head.framerate}\n"
+    val numAnimatedComponents =
+      s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n"
+
+    val convertedHierarchy = hierarchy
+      .map(Hierarchy.convert)
+      .mkString(start = "hierarchy {\n\t", sep = "\n\t", end = "\n}\n\n")
+
+    val convertedBounds = bounds
+      .map(Bound.convert)
+      .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n\n")
+
+    val convertedBaseFrame = "baseframe {}\n\n"
+
+    val convertedFrames = frames
+      .map(Frame.convert)
+      .mkString(start = "\n", sep = "\n\n", end = "\n")
+
+    version + commandline + numFrames + numJoints + frameRate + numAnimatedComponents + convertedHierarchy + convertedBaseFrame + convertedFrames
   }
 }

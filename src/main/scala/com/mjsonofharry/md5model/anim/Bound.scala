@@ -14,4 +14,7 @@ object Bound {
     val List(minX, minY, minZ, maxX, maxY, maxZ) = values
     Bound(minX, minY, minZ, maxX, maxY, maxZ)
   }
+
+  def convert(bound: Bound): String =
+    s"( ${bound.minX} ${bound.minY} ${bound.minZ} ) ( ${bound.maxX} ${bound.maxY} ${bound.maxZ} )"
 }
