@@ -6,6 +6,7 @@ import java.nio.ByteBuffer
 
 import com.mjsonofharry.md5model.mesh.{Md5Mesh, Joint}
 import com.mjsonofharry.md5model.utils.Utils._
+import shapeless.syntax.typeable
 
 case class Md5Anim(
     commandline: String,
@@ -27,45 +28,58 @@ object Md5Anim {
   val BOUNDS_MIN = "boundsMin"
   val BOUNDS_MAX = "boundsMax"
 
+  type Keys = List[Double]
+  type JointName = String
+  type Attribute = String
+
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
-    val jointTable: Map[String, Joint] =
+    val maxRange: Int = md5anim.channels.map(_.range._2).max
+    val jointTable: Map[JointName, Joint] =
       md5mesh.joints.map((j) => (j.name, j)).toMap
 
-    val groupedChannels: List[(String, List[Channel])] = md5anim.channels
+    val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
+      .filterNot((c) => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
       .groupBy(_.jointName)
       .toList
-
-    val hierarchy: List[Hierarchy] = groupedChannels
-      .filterNot {
-        case (jointName: String, _) =>
-          List(BOUNDS_MIN, BOUNDS_MAX).contains(jointName)
-      }
-      .map {
-        case (jointName: String, channels: List[Channel]) =>
-          (jointTable(jointName), channels.filter(_.jointName == jointName))
-      }
+      .map((g) => (jointTable(g._1), g._2))
       .sortBy(_._1.index)
-      .foldLeft((0, Nil: List[Hierarchy])) {
+
+    val hierarchy: List[Hierarchy] = jointChannels
+      .foldLeft((0, List.empty[Hierarchy])) {
         case (
-            (currentIndex: Int, acc: List[Hierarchy]),
+            (i: Int, acc: List[Hierarchy]),
             (joint: Joint, channels: List[Channel])
             ) =>
           (
-            currentIndex + channels
+            i + channels
               .filter(_.keys.size > 1)
               .map(_.attribute)
               .toSet
               .size,
-            acc :+ Hierarchy(joint, channels, currentIndex)
+            acc :+ Hierarchy(joint, channels, i)
           )
       }
       ._2
 
-    val bounds = groupedChannels
-      .filter {
-        case (jointName: String, _) =>
-          List(BOUNDS_MIN, BOUNDS_MAX).contains(jointName)
+    val boundChannels: List[(JointName, (Attribute, Keys))] = md5anim.channels
+      .filter((c) => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
+      .map {
+        case (channel: Channel) =>
+          (
+            channel.jointName,
+            (channel.attribute, padKeys(channel.keys, channel.range, maxRange))
+          )
       }
+    val boundsMin = boundChannels.filter(_._1 == BOUNDS_MIN).map(_._2).toMap
+    val boundsMax = boundChannels.filter(_._1 == BOUNDS_MAX).map(_._2).toMap
+    val bounds = List(
+      boundsMin("x"),
+      boundsMin("y"),
+      boundsMin("z"),
+      boundsMax("x"),
+      boundsMax("y"),
+      boundsMax("z")
+    ).transpose
 
     ""
   }
