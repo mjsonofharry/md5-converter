@@ -34,4 +34,20 @@ object Utils {
     val appended = prepended.reverse.padTo(finish, keys.last)
     appended
   }
+
+  val powers: Stream[Int] = Stream.from(2).scanLeft(1)((x, _) => x * 2)
+  def bin2int(bits: String): Int =
+    bits.toList
+      .map(_.asDigit)
+      .zip(powers.take(bits.size).toList.reverse)
+      .map(
+        xe =>
+          xe match {
+            case (1, e) => e
+            case (0, _) => 0
+            case (x, _) =>
+              throw new NumberFormatException(s"Cannot convert ${x} into a bit")
+          }
+      )
+      .reduce(_ + _)
 }

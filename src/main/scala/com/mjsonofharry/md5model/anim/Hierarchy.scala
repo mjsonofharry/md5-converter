@@ -1,7 +1,5 @@
 package com.mjsonofharry.md5model.anim
 
-import java.nio.ByteBuffer
-
 import com.mjsonofharry.md5model.mesh.Joint
 import com.mjsonofharry.md5model.utils.Utils._
 
@@ -33,11 +31,10 @@ object Hierarchy {
     val pitch = attributes.contains("pitch")
     val yaw = attributes.contains("yaw")
     val roll = attributes.contains("roll")
-    val flags: Int = ByteBuffer
-      .wrap(Array(x, y, z, pitch, yaw, roll).map((b: Boolean) => {
-        if (b) 1 else 0
-      }: Byte))
-      .getInt
+    val flags: Int = bin2int(List(x, y, z, pitch, yaw, roll).map(x => x match {
+      case true => 1
+      case false => 0
+    }).mkString)
 
     val transformedAttributes: Set[AttributeName] = attributes.map(_ match {
       case "x"     => "Tx"
