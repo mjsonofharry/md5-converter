@@ -103,7 +103,6 @@ object Md5Anim {
       .map(frameIndex => {
         println(s"  Generating frame ${frameIndex}")
         Frame(frameIndex, jointValues.map(jv => {
-          println(s"    Fetching value for ${jv._1.name}")
           jv._2.get(frameIndex).getOrElse(Nil: List[Key])
         }))
       })
@@ -146,7 +145,7 @@ object Md5Anim {
     val numJoints = s"numJoints ${md5mesh.joints.size}\n"
     val frameRate = s"frameRate ${firstChannel.framerate}\n"
     val numAnimatedComponents =
-      s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n"
+      s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
 
     val convertedHierarchy = hierarchy
       .map(Hierarchy.convert)

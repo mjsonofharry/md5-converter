@@ -7,6 +7,7 @@ import com.mjsonofharry.md5model.utils.Utils._
 
 case class Hierarchy(
     jointName: JointName,
+    parentJointName: JointName,
     parentJointIndex: Int,
     flags: Int,
     attributes: Set[AttributeName],
@@ -47,11 +48,15 @@ object Hierarchy {
       case "yaw"   => "Qz"
     })
 
-    Hierarchy(name, parentIndex, flags, transformedAttributes, startIndex)
+    Hierarchy(name, joint.parentName, parentIndex, flags, transformedAttributes, startIndex)
   }
 
   def convert(hierarchy: Hierarchy): String = {
-    val comment = s"// ( ${hierarchy.attributes.mkString(" ")} )"
+    val attributes =
+      if (hierarchy.attributes.size > 0)
+        hierarchy.attributes.mkString(start = " (", sep = " ", end = ")")
+      else ""
+    val comment = s"// ${hierarchy.parentJointName}${attributes}"
     s"${QUOTE}${hierarchy.jointName}${QUOTE}\t${hierarchy.parentJointIndex} ${hierarchy.flags} ${hierarchy.startIndex}\t${comment}"
   }
 }
