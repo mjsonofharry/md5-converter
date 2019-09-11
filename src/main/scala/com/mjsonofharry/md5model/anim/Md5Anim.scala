@@ -99,24 +99,43 @@ object Md5Anim {
       }
     }
 
-    jointValues.head._2.foreach(x => println(x.mkString(" ")))
-
-    ???
+    { 0 to maxRange - 1 }.toList
+      .map(frameIndex => {
+        println(s"  Generating frame ${frameIndex}")
+        Frame(frameIndex, jointValues.map(jv => {
+          println(s"    Fetching value for ${jv._1.name}")
+          jv._2.get(frameIndex).getOrElse(Nil: List[Key])
+        }))
+      })
   }
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val maxRange: Int = md5anim.channels.map(_.range._2).max
+    val frameCount: Int = md5anim.channels.map(c => {c.framerate * c.endtime}.toInt).max
+    assert(maxRange == frameCount)
+    println(s"Counted ${frameCount} frames")
 
+    println("Mapping joints to channels")
     val jointChannels: List[(Joint, List[Channel])] =
       mapJointsToChannels(md5anim.channels, md5mesh.joints)
+    println(s"Mapped ${jointChannels.size} joints to their channels")
 
+    println("Creating hierarchy...")
     val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels, maxRange)
+    println(s"Hierarchy contains ${hierarchy.size} joints")
+    hierarchy.foreach(h => println(s"  ${h.jointName}"))
 
+    println("Creating bounds...")
     val bounds: List[Bound] = computeBounds(md5anim.channels, maxRange)
+    println(s"Created ${bounds.size} bounds")
 
+    println("Creating baseframe...")
     val baseFrame = Nil
+    println("Skipped for now")
 
+    println("Creating frames...")
     val frames = computeFrames(jointChannels, maxRange)
+    println(s"Created ${frames.size} frames")
 
     val firstChannel = md5anim.channels.head
 

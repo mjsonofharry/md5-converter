@@ -47,17 +47,6 @@ object Hierarchy {
       case "yaw"   => "Qz"
     })
 
-    // val frameValues: List[List[Double]] = List(
-    //   filteredChannels.find(_.attribute == "x"),
-    //   filteredChannels.find(_.attribute == "y"),
-    //   filteredChannels.find(_.attribute == "z"),
-    //   filteredChannels.find(_.attribute == "roll"),
-    //   filteredChannels.find(_.attribute == "pitch"),
-    //   filteredChannels.find(_.attribute == "yaw")
-    // ).collect { case Some(c) => c }
-    //   .map((c: Channel) => padKeys(c.keys, c.range, maxRange))
-    //   .transpose
-
     Hierarchy(name, parentIndex, flags, transformedAttributes, startIndex)
   }
 
