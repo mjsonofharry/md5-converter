@@ -5,9 +5,11 @@ import cats.implicits._
 import java.text.DecimalFormat
 
 object Utils {
+  type Key = Double
+  type JointName = String
+  type AttributeName = String
 
   val QUOTE = '"'
-
   def quotate(inside: String): String = QUOTE + inside + QUOTE
   def keyValue[T](key: String, valueParser: Parser[T]) =
     string(key) ~ spaceChar ~> valueParser <~ whitespaces
@@ -21,17 +23,15 @@ object Utils {
   def format(x: Double) = decimalFormatter.format(x)
 
   def padKeys(
-      keys: List[Double],
+      keys: List[Key],
       range: (Int, Int),
       padTo: Int
-  ): List[Double] = {
+  ): List[Key] = {
     val (start, finish) = range
-    val prepend = (0 to start)
-      .map((n) => keys.head)
-      .toList
-    val append = (0 to padTo - finish)
-      .map((n) => keys.last)
-      .toList
-    prepend ++ keys ++ append
+    val prependTo = start + keys.size
+    val appendTo = finish
+    val prepended = keys.reverse.padTo(start + keys.size, keys.head)
+    val appended = prepended.reverse.padTo(finish, keys.last)
+    appended
   }
 }

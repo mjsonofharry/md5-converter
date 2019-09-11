@@ -6,10 +6,10 @@ import com.mjsonofharry.md5model.mesh.Joint
 import com.mjsonofharry.md5model.utils.Utils._
 
 case class Hierarchy(
-    jointName: String,
+    jointName: JointName,
     parentJointIndex: Int,
     flags: Int,
-    attributes: Set[String],
+    attributes: Set[AttributeName],
     startIndex: Int
 )
 
@@ -17,14 +17,15 @@ object Hierarchy {
   def apply(
       joint: Joint,
       channels: List[Channel],
-      startIndex: Int
+      startIndex: Int,
+      maxRange: Int
   ): Hierarchy = {
     val name = joint.name
     val parentIndex = joint.parentIndex
 
     val filteredChannels: List[Channel] = channels.filter(_.keys.size > 1)
 
-    val attributes: Set[String] = filteredChannels.map(_.attribute).toSet
+    val attributes: Set[AttributeName] = filteredChannels.map(_.attribute).toSet
     val x = attributes.contains("x")
     val y = attributes.contains("y")
     val z = attributes.contains("z")
@@ -37,7 +38,7 @@ object Hierarchy {
       }: Byte))
       .getInt
 
-    val transformedAttributes: Set[String] = attributes.map(_ match {
+    val transformedAttributes: Set[AttributeName] = attributes.map(_ match {
       case "x"     => "Tx"
       case "y"     => "Ty"
       case "z"     => "Tz"
@@ -46,22 +47,16 @@ object Hierarchy {
       case "yaw"   => "Qz"
     })
 
-    val maxRange: Int = filteredChannels.map(_.range._2).max
-    val frameValues: List[List[Double]] = List(
-      filteredChannels.find(_.attribute == "x"),
-      filteredChannels.find(_.attribute == "y"),
-      filteredChannels.find(_.attribute == "z"),
-      filteredChannels.find(_.attribute == "roll"),
-      filteredChannels.find(_.attribute == "pitch"),
-      filteredChannels.find(_.attribute == "yaw")
-    ).collect { case Some(c) => c }
-      .map((c: Channel) => {
-        val (start, finish) = c.range
-        val prepend = (0 to start).map((n) => c.keys.head).toList
-        val append = (0 to maxRange - finish).map((n) => c.keys.last).toList
-        prepend ++ c.keys ++ append
-      })
-      .transpose
+    // val frameValues: List[List[Double]] = List(
+    //   filteredChannels.find(_.attribute == "x"),
+    //   filteredChannels.find(_.attribute == "y"),
+    //   filteredChannels.find(_.attribute == "z"),
+    //   filteredChannels.find(_.attribute == "roll"),
+    //   filteredChannels.find(_.attribute == "pitch"),
+    //   filteredChannels.find(_.attribute == "yaw")
+    // ).collect { case Some(c) => c }
+    //   .map((c: Channel) => padKeys(c.keys, c.range, maxRange))
+    //   .transpose
 
     Hierarchy(name, parentIndex, flags, transformedAttributes, startIndex)
   }
