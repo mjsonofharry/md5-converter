@@ -35,28 +35,31 @@ object Hierarchy {
     val name = joint.name
     val parentIndex = joint.parentIndex
 
-    val filteredChannels: List[Channel] = channels.filter(_.keys.size > 1)
+    // val filteredChannels: List[Channel] = channels.filter(_.keys.size > 1)
 
-    val attributes: Set[AttributeName] = filteredChannels.map(_.attribute).toSet
-    val x = attributes.contains("x")
-    val y = attributes.contains("y")
-    val z = attributes.contains("z")
-    val pitch = attributes.contains("pitch")
-    val yaw = attributes.contains("yaw")
-    val roll = attributes.contains("roll")
-    val flags: Int = bin2int(List(x, y, z, pitch, yaw, roll).map(x => x match {
-      case true => 1
-      case false => 0
-    }).mkString)
+    // val attributes: Set[AttributeName] = filteredChannels.map(_.attribute).toSet
+    // val x = attributes.contains("x")
+    // val y = attributes.contains("y")
+    // val z = attributes.contains("z")
+    // val pitch = attributes.contains("pitch")
+    // val yaw = attributes.contains("yaw")
+    // val roll = attributes.contains("roll")
+    // val flags: Int = bin2int(List(x, y, z, pitch, yaw, roll).map(x => x match {
+    //   case true => 1
+    //   case false => 0
+    // }).mkString)
 
-    val transformedAttributes: Set[AttributeName] = attributes.map(_ match {
-      case "x"     => "Tx"
-      case "y"     => "Ty"
-      case "z"     => "Tz"
-      case "roll"  => "Qx"
-      case "pitch" => "Qy"
-      case "yaw"   => "Qz"
-    })
+      val flags = bin2int("111111")
+
+    // val transformedAttributes: Set[AttributeName] = attributes.map(_ match {
+    //   case "x"     => "Tx"
+    //   case "y"     => "Ty"
+    //   case "z"     => "Tz"
+    //   case "roll"  => "Qx"
+    //   case "pitch" => "Qy"
+    //   case "yaw"   => "Qz"
+    // })
+    val transformedAttributes = Set.empty[String]
 
     Hierarchy(name, joint.parentName, parentIndex, flags, transformedAttributes, startIndex)
   }

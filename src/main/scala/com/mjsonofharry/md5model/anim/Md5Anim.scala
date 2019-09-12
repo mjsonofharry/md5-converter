@@ -145,8 +145,9 @@ object Md5Anim {
       s"numFrames ${firstChannel.framerate * firstChannel.framerate}\n"
     val numJoints = s"numJoints ${md5mesh.joints.size}\n"
     val frameRate = s"frameRate ${firstChannel.framerate}\n"
-    val numAnimatedComponents =
-      s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
+    // val numAnimatedComponents =
+    //   s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
+    val numAnimatedComponents = hierarchy.size * 6
 
     val convertedHierarchy = hierarchy
       .map(Hierarchy.convert)
