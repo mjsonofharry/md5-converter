@@ -20,6 +20,11 @@ case class Frame(index: Int, values: List[FramePart])
 object Frame {
   def convert(frame: Frame): String =
     s"frame ${frame.index} " + frame.values
-      .map(_.values.mkString(" "))
+      .map(f => s"${f.x} ${f.y} ${f.z} ${f.qx} ${f.qy} ${f.qz}")
+      .mkString(start = "{\n\t", sep = "\n\t", end = "\n}")
+
+  def convertWithParens(frame: Frame): String =
+    s"frame ${frame.index} " + frame.values
+      .map(f => s"( ${f.x} ${f.y} ${f.z} ) ( ${f.qx} ${f.qy} ${f.qz} )")
       .mkString(start = "{\n\t", sep = "\n\t", end = "\n}")
 }

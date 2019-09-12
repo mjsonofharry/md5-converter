@@ -129,14 +129,16 @@ object Md5Anim {
     frames
   }
 
+  def computeBaseFrame(frames: List[Frame]) = frames.head.values
+
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val maxRange: Int = md5anim.channels.map(_.range._2).max
     val jointChannels: List[(Joint, List[Channel])] =
       mapJointsToChannels(md5anim.channels, md5mesh.joints)
     val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels, maxRange)
     val bounds: List[Bound] = computeBounds(md5anim.channels, maxRange)
-    val baseFrame = Nil
-    val frames = computeFrames(jointChannels, maxRange)
+    val frames: List[Frame] = computeFrames(jointChannels, maxRange)
+    val baseFrame: List[FramePart] = computeBaseFrame(frames)
     val firstChannel = md5anim.channels.head
 
     val version = "MD5Version 10\n"
@@ -147,7 +149,8 @@ object Md5Anim {
     val frameRate = s"frameRate ${firstChannel.framerate}\n"
     // val numAnimatedComponents =
     //   s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
-    val numAnimatedComponents = s"numAnimatedComponents ${hierarchy.size * 6}\n\n"
+    val numAnimatedComponents =
+      s"numAnimatedComponents ${hierarchy.size * 6}\n\n"
 
     val convertedHierarchy = hierarchy
       .map(Hierarchy.convert)
@@ -157,7 +160,8 @@ object Md5Anim {
       .map(Bound.convert)
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n\n")
 
-    val convertedBaseFrame = "baseframe {}\n\n"
+    val convertedBaseFrame =
+      baseFrame.mkString(start = "baseframe {\n", sep = "\t\n", end = "\n}\n\n")
 
     val convertedFrames = frames
       .map(Frame.convert)
