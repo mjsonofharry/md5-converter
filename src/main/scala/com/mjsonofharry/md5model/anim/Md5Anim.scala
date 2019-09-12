@@ -147,7 +147,7 @@ object Md5Anim {
     val frameRate = s"frameRate ${firstChannel.framerate}\n"
     // val numAnimatedComponents =
     //   s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
-    val numAnimatedComponents = hierarchy.size * 6
+    val numAnimatedComponents = s"numAnimatedComponents ${hierarchy.size * 6}\n\n"
 
     val convertedHierarchy = hierarchy
       .map(Hierarchy.convert)
