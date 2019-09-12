@@ -2,11 +2,10 @@ package com.mjsonofharry.md5model.anim
 
 import atto._, Atto._
 import cats.implicits._
-import java.nio.ByteBuffer
 
 import com.mjsonofharry.md5model.mesh.{Md5Mesh, Joint}
 import com.mjsonofharry.md5model.utils.Utils._
-import shapeless.syntax.typeable
+import com.mjsonofharry.md5model.math.Quaternion
 
 case class Md5Anim(
     commandline: String,
@@ -32,7 +31,7 @@ object Md5Anim {
       channels: List[Channel],
       joints: List[Joint]
   ): List[(Joint, List[Channel])] = {
-    val jointTable: Map[JointName, Joint] = joints.map((j) => (j.name, j)).toMap
+    val jointTable: Map[String, Joint] = joints.map((j) => (j.name, j)).toMap
     channels
       .filterNot(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
       .groupBy(_.jointName)
@@ -84,58 +83,60 @@ object Md5Anim {
       jointChannels: List[(Joint, List[Channel])],
       maxRange: Int
   ): List[Frame] = {
-    val jointValues = jointChannels.map {
+    val jointValues: List[(Joint, List[FramePart])] = jointChannels.map {
       case (joint: Joint, channels: List[Channel]) => {
-        val filterChannels = channels.filter(_.keys.size > 1)
-        val values = List(
-          filterChannels.find(_.attribute == "x"),
-          filterChannels.find(_.attribute == "y"),
-          filterChannels.find(_.attribute == "z"),
-          filterChannels.find(_.attribute == "roll"),
-          filterChannels.find(_.attribute == "pitch"),
-          filterChannels.find(_.attribute == "yaw")
-        ).collect { case Some(c) => padKeys(c.keys, c.range, maxRange) }
-        (joint, values.transpose)
+        val channelMap = channels.map(c => (c.attribute, c)).toMap
+        val attributeKeys: Map[String, List[Double]] = channels
+          .map(c => (c.attribute, padKeys(c.keys, c.range, maxRange)))
+          .toMap
+        val xKeys: List[Double] = attributeKeys("x")
+        val yKeys: List[Double] = attributeKeys("y")
+        val zKeys: List[Double] = attributeKeys("z")
+        val yawKeys: List[Double] = attributeKeys("yaw")
+        val pitchKeys: List[Double] = attributeKeys("pitch")
+        val rollKeys: List[Double] = attributeKeys("roll")
+
+        val keys: List[FramePart] =
+          List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
+            .map {
+              case List(x, y, z, yaw, pitch, roll) => {
+                val q = Quaternion.from_euler(yaw, pitch, roll)
+                FramePart(
+                  joint = joint,
+                  x = x,
+                  y = y,
+                  z = z,
+                  qx = q.x,
+                  qy = q.y,
+                  qz = q.z,
+                  qw = q.w
+                )
+              }
+            }
+
+        (joint, keys)
       }
     }
 
-    { 0 to maxRange - 1 }.toList
+    val frames = { 0 to maxRange - 1 }.toList
       .map(frameIndex => {
-        println(s"  Generating frame ${frameIndex}")
-        Frame(frameIndex, jointValues.map(jv => {
-          jv._2.get(frameIndex).getOrElse(Nil: List[Key])
-        }))
+        Frame(frameIndex, jointValues.map {
+          case (joint: Joint, frameParts: List[FramePart]) => {
+            frameParts.get(frameIndex).get
+          }
+        })
       })
+    frames
   }
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val maxRange: Int = md5anim.channels.map(_.range._2).max
-    val frameCount: Int = md5anim.channels.map(c => {c.framerate * c.endtime}.toInt).max
-    assert(maxRange == frameCount)
-    println(s"Counted ${frameCount} frames")
-
-    println("Mapping joints to channels")
     val jointChannels: List[(Joint, List[Channel])] =
       mapJointsToChannels(md5anim.channels, md5mesh.joints)
-    println(s"Mapped ${jointChannels.size} joints to their channels")
-
-    println("Creating hierarchy...")
     val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels, maxRange)
-    println(s"Hierarchy contains ${hierarchy.size} joints")
-    hierarchy.foreach(h => println(s"  ${h.jointName}"))
-
-    println("Creating bounds...")
     val bounds: List[Bound] = computeBounds(md5anim.channels, maxRange)
-    println(s"Created ${bounds.size} bounds")
-
-    println("Creating baseframe...")
     val baseFrame = Nil
-    println("Skipped for now")
-
-    println("Creating frames...")
     val frames = computeFrames(jointChannels, maxRange)
-    println(s"Created ${frames.size} frames")
-
     val firstChannel = md5anim.channels.head
 
     val version = "MD5Version 10\n"
@@ -161,6 +162,6 @@ object Md5Anim {
       .map(Frame.convert)
       .mkString(start = "\n", sep = "\n\n", end = "\n")
 
-    version + commandline + numFrames + numJoints + frameRate + numAnimatedComponents + convertedHierarchy + convertedBaseFrame + convertedFrames
+    version + commandline + numFrames + numJoints + frameRate + numAnimatedComponents + convertedHierarchy + convertedBounds + convertedBaseFrame + convertedFrames
   }
 }

@@ -13,6 +13,19 @@ case class Hierarchy(
 )
 
 object Hierarchy {
+  val powers: Stream[Int] = Stream.from(2).scanLeft(1)((x, _) => x * 2)
+  def bin2int(bits: String): Int =
+    bits.toList
+      .map(_.asDigit)
+      .zip(powers.take(bits.size).toList.reverse)
+      .map { case(b, exp) => b match {
+        case 1 => exp
+        case 0 => 0
+        case _ =>
+          throw new NumberFormatException(s"Cannot convert ${b} into a bit")
+      }}
+      .reduce(_ + _)
+
   def apply(
       joint: Joint,
       channels: List[Channel],

@@ -32,6 +32,8 @@ import breeze.linalg._
   THE SOFTWARE.
  */
 
+case class Quaternion(w: Double, x: Double, y: Double, z: Double)
+
 object Quaternion {
   def from_matrix(matrix: List[Double]): List[Double] = {
     val List(xx, yx, zx, xy, yy, zy, xz, yz, zz): List[Double] = matrix
@@ -49,9 +51,19 @@ object Quaternion {
     if (q.last < 0) q.map(_ * -1) else q
   }
 
-  def from_axis_angle(theta: Double, vector: List[Double]): List[Double] = {
-    val t2 = theta / 2.0
-    val st2 = math.sin(t2)
-    vector.map(_ * st2) :+ math.cos(t2)
+  // from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+  def from_euler(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+    val cy = math.cos(yaw * 0.5)
+    val sy = math.sin(yaw * 0.5)
+    val cp = math.cos(pitch * 0.5)
+    val sp = math.sin(pitch * 0.5)
+    val cr = math.cos(roll * 0.5)
+    val sr = math.sin(roll * 0.5)
+    Quaternion(
+      w = cy * cp * cr + sy * sp * sr,
+      x = cy * cp * sr - sy * sp * cr,
+      y = sy * cp * sr + cy * sp * cr,
+      z = sy * cp * cr - cy * sp * sr
+    )
   }
 }
