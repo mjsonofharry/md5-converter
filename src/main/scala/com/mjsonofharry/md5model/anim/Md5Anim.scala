@@ -129,7 +129,7 @@ object Md5Anim {
     frames
   }
 
-  def computeBaseFrame(frames: List[Frame]) = frames.head.values
+  def computeBaseFrame(frames: List[Frame]): List[FramePart] = frames.head.values
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val maxRange: Int = md5anim.channels.map(_.range._2).max
@@ -160,8 +160,9 @@ object Md5Anim {
       .map(Bound.convert)
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n\n")
 
-    val convertedBaseFrame =
-      baseFrame.mkString(start = "baseframe {\n", sep = "\t\n", end = "\n}\n\n")
+    val convertedBaseFrame = baseFrame
+      .map(f => s"( ${f.x} ${f.y} ${f.z} ) ( ${f.qx} ${f.qy} ${f.qz} )")
+      .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n\n")
 
     val convertedFrames = frames
       .map(Frame.convert)
