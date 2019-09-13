@@ -144,7 +144,7 @@ object Md5Anim {
     val version = "MD5Version 10\n"
     val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"
     val numFrames =
-      s"numFrames ${firstChannel.framerate * firstChannel.framerate}\n"
+      s"numFrames ${(firstChannel.framerate * firstChannel.framerate).toInt}\n"
     val numJoints = s"numJoints ${md5mesh.joints.size}\n"
     val frameRate = s"frameRate ${firstChannel.framerate}\n"
     // val numAnimatedComponents =
