@@ -28,5 +28,9 @@ object Joint {
   }
 
   def convert(joint: Joint): String =
-    s"${QUOTE}${joint.name}${QUOTE}\t${joint.parentIndex} ${joint.position} ${joint.orientation}\t\t// ${joint.parentName}"
+    s"${QUOTE}${joint.name}${QUOTE}\t${joint.parentIndex} ${joint.position
+      .map(format)
+      .mkString(start = "( ", sep = " ", end = " )")} ${joint.orientation.take(3)
+      .map(format)
+      .mkString(start = "( ", sep = " ", end = " )")}\t\t// ${joint.parentName}"
 }
