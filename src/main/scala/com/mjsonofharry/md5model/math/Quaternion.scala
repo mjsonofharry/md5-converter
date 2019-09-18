@@ -35,7 +35,7 @@ import breeze.linalg._
 case class Quaternion(w: Double, x: Double, y: Double, z: Double)
 
 object Quaternion {
-  def from_matrix(matrix: List[Double]): List[Double] = {
+  def from_matrix(matrix: List[Double]): Quaternion = {
     val List(xx, yx, zx, xy, yy, zy, xz, yz, zz): List[Double] = matrix
 
     val k: DenseMatrix[Double] = DenseMatrix(
@@ -48,22 +48,56 @@ object Quaternion {
     val e = eigSym2(k)
     val q: List[Double] =
       e.eigenvectors(::, argmax(e.eigenvalues)).toArray.toList
-    if (q.last < 0) q.map(_ * -1) else q
+    val List(x, y, z, w) = if (q.last < 0) q.map(_ * -1) else q
+    Quaternion(w, x, y, z)
   }
 
-  // from https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
-  def from_euler(yaw: Double, pitch: Double, roll: Double): Quaternion = {
-    val cy = math.cos(yaw * 0.5)
-    val sy = math.sin(yaw * 0.5)
-    val cp = math.cos(pitch * 0.5)
-    val sp = math.sin(pitch * 0.5)
-    val cr = math.cos(roll * 0.5)
-    val sr = math.sin(roll * 0.5)
-    Quaternion(
-      w = cy * cp * cr + sy * sp * sr,
-      x = cy * cp * sr - sy * sp * cr,
-      y = sy * cp * sr + cy * sp * cr,
-      z = sy * cp * cr - cy * sp * sr
-    )
+  // from https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
+  def from_euler2(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+    val r = Math.PI / 180
+    val heading = yaw * r
+    val attitude = pitch * r
+    val bank = roll * r
+    val c1 = Math.cos(heading / 2);
+    val s1 = Math.sin(heading / 2);
+    val c2 = Math.cos(attitude / 2);
+    val s2 = Math.sin(attitude / 2);
+    val c3 = Math.cos(bank / 2);
+    val s3 = Math.sin(bank / 2);
+    val c1c2 = c1 * c2;
+    val s1s2 = s1 * s2;
+    val w = (c1c2 * c3) - (s1s2 * s3);
+  	val x = (c1c2 * s3) + (s1s2 * c3);
+    val y = (s1 * c2 * c3) + (c1 * s2 * s3);
+    val z = (c1 * s2 * c3) - (s1 * c2 * s3);
+    Quaternion(w, x, y, z)
   }
+
+  // from https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
+  def from_euler3(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+    val r = Math.PI / 180
+    val heading = yaw * r
+    val attitude = pitch * r
+    val bank = roll * r
+    val c1 = Math.cos(heading)
+    val s1 = Math.sin(heading)
+    val c2 = Math.cos(attitude)
+    val s2 = Math.sin(attitude)
+    val c3 = Math.cos(bank)
+    val s3 = Math.sin(bank)
+    val w = Math.sqrt(1.0 + (c1 * c2) + (c1 * c3) - (s1 * s2 * s3) + (c2 * c3)) / 2.0
+    val w4 = (4.0 * w)
+    val x = (c2 * s3 + c1 * s3 + s1 * s2 * c3) / w4
+    val y = (s1 * c2 + s1 * c3 + c1 * s2 * s3) / w4
+    val z = (-s1 * s3 + c1 * s2 * c3 +s2) / w4
+    Quaternion(w, x, y, z)
+  }
+
+  def normalized(q: Quaternion): Quaternion = {
+    val d = norm(q)
+    Quaternion(q.w / d, q.x / d, q.y / d, q.z / d)
+  }
+
+  def norm(q: Quaternion): Double =
+    math.sqrt((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w))
 }

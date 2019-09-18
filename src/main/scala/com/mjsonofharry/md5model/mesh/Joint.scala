@@ -7,7 +7,7 @@ case class Joint(
     index: Int,
     name: String,
     position: List[Double],
-    orientation: List[Double],
+    orientation: Quaternion,
     parentIndex: Int,
     parentName: String
 )
@@ -27,10 +27,14 @@ object Joint {
     )
   }
 
-  def convert(joint: Joint): String =
-    s"${QUOTE}${joint.name}${QUOTE}\t${joint.parentIndex} ${joint.position
+  def convert(joint: Joint): String = {
+    val position = joint.position
       .map(format)
-      .mkString(start = "( ", sep = " ", end = " )")} ${joint.orientation.take(3)
-      .map(format)
-      .mkString(start = "( ", sep = " ", end = " )")}\t\t// ${joint.parentName}"
+      .mkString(start = "( ", sep = " ", end = " )")
+    val orientation =
+      List(joint.orientation.x, joint.orientation.y, joint.orientation.z)
+        .map(format)
+        .mkString(start = "( ", sep = " ", end = " )")
+    s"${QUOTE}${joint.name}${QUOTE}\t${joint.parentIndex} ${position} ${orientation}\t\t// ${joint.parentName}"
+  }
 }

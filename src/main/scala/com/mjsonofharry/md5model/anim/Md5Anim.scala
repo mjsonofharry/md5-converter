@@ -20,10 +20,6 @@ object Md5Anim {
     channels <- many(Channel.parser <~ whitespaces)
   } yield Md5Anim(commandline, numchannels, channels)
 
-  val PITCH = List(0, 1, 0)
-  val YAW = List(0, 0, 1)
-  val ROLL = List(1, 0, 0)
-
   val BOUNDS_MIN: JointName = "boundsMin"
   val BOUNDS_MAX: JointName = "boundsMax"
 
@@ -100,17 +96,7 @@ object Md5Anim {
           List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
             .map {
               case List(x, y, z, yaw, pitch, roll) => {
-                val q = Quaternion.from_euler(yaw, pitch, roll)
-                FramePart(
-                  joint = joint,
-                  x = x,
-                  y = y,
-                  z = z,
-                  qx = q.x,
-                  qy = q.y,
-                  qz = q.z,
-                  qw = q.w
-                )
+                FramePart(joint, x, y, z, Quaternion.normalized(Quaternion.from_euler3(yaw, pitch, roll)))
               }
             }
 
@@ -118,7 +104,7 @@ object Md5Anim {
       }
     }
 
-    val frames = { 0 to maxRange - 1 }.toList
+    val frames = { 0 until maxRange }.toList
       .map(frameIndex => {
         Frame(frameIndex, jointValues.map {
           case (joint: Joint, frameParts: List[FramePart]) => {
@@ -129,7 +115,15 @@ object Md5Anim {
     frames
   }
 
-  def computeBaseFrame(frames: List[Frame]): List[FramePart] = frames.head.values
+  def firstFrame(frames: List[Frame]): List[FramePart] = frames.head.values
+
+  def defaultFrame(md5mesh: Md5Mesh): List[FramePart] =
+    md5mesh.joints
+      .sortBy(_.index)
+      .map(j => {
+        val List(x: Double, y: Double, z: Double) = j.position
+        FramePart(j, x, y, z, j.orientation)
+      })
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val maxRange: Int = md5anim.channels.map(_.range._2).max
@@ -138,7 +132,7 @@ object Md5Anim {
     val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels, maxRange)
     val bounds: List[Bound] = computeBounds(md5anim.channels, maxRange)
     val frames: List[Frame] = computeFrames(jointChannels, maxRange)
-    val baseFrame: List[FramePart] = computeBaseFrame(frames)
+    val baseFrame: List[FramePart] = firstFrame(frames)
     val firstChannel = md5anim.channels.head
 
     val version = "MD5Version 10\n"
@@ -161,7 +155,10 @@ object Md5Anim {
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n\n")
 
     val convertedBaseFrame = baseFrame
-      .map(f => s"( ${f.x} ${f.y} ${f.z} ) ( ${f.qx} ${f.qy} ${f.qz} )")
+      .map(
+        f =>
+          s"( ${f.x} ${f.y} ${f.z} ) ( ${f.orientation.x} ${f.orientation.y} ${f.orientation.z} )"
+      )
       .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n\n")
 
     val convertedFrames = frames

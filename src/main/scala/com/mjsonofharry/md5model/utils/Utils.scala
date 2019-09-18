@@ -34,4 +34,9 @@ object Utils {
     val appended = prepended.reverse.padTo(finish, keys.last)
     appended
   }
+
+  def spreadKeys(keys: List[Key], total: Int): List[Key] =
+    (0 until total)
+      .map(x => keys(((x.toDouble / total) * keys.size).toInt))
+      .toList
 }
