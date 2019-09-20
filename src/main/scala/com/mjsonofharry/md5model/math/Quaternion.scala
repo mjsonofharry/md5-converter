@@ -86,18 +86,45 @@ object Quaternion {
     val c3 = Math.cos(bank)
     val s3 = Math.sin(bank)
     val w = Math.sqrt(1.0 + (c1 * c2) + (c1 * c3) - (s1 * s2 * s3) + (c2 * c3)) / 2.0
-    val w4 = (4.0 * w)
-    val x = (c2 * s3 + c1 * s3 + s1 * s2 * c3) / w4
-    val y = (s1 * c2 + s1 * c3 + c1 * s2 * s3) / w4
-    val z = (-s1 * s3 + c1 * s2 * c3 +s2) / w4
+    val w4 = 4.0 * w
+    val x = ((c2 * s3) + (c1 * s3) + (s1 * s2 * c3)) / w4
+    val y = ((s1 * c2) + (s1 * c3) + (c1 * s2 * s3)) / w4
+    val z = ((-s1 * s3) + (c1 * s2 * c3) +s2) / w4
     Quaternion(w, x, y, z)
   }
 
-  def normalized(q: Quaternion): Quaternion = {
-    val d = norm(q)
-    Quaternion(q.w / d, q.x / d, q.y / d, q.z / d)
+  def from_euler4(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+    val r = Math.PI / 180
+    val heading = yaw * r
+    val attitude = pitch * r
+    val bank = roll * r
+    val ch = Math.cos(heading);
+    val sh = Math.sin(heading);
+    val ca = Math.cos(attitude);
+    val sa = Math.sin(attitude);
+    val cb = Math.cos(bank);
+    val sb = Math.sin(bank);
+
+    val m00 = ch * ca;
+    val m01 = sh*sb - ch*sa*cb;
+    val m02 = ch*sa*sb + sh*cb;
+    val m10 = sa;
+    val m11 = ca*cb;
+    val m12 = -ca*sb;
+    val m20 = -sh*ca;
+    val m21 = sh*sa*cb + ch*sb;
+    val m22 = -sh*sa*sb + ch*cb;
+
+    from_matrix(List(m00, m01, m02, m10, m11, m12, m20, m21, m22))
   }
 
-  def norm(q: Quaternion): Double =
-    math.sqrt((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w))
+  // https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
+  def normalized(q: Quaternion): Quaternion = {
+    val n = math.sqrt((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w))
+    val x = q.x / n
+    val y = q.y / n
+    val z = q.z / n
+    val w = q.w / n
+    Quaternion(w, x, y, z)
+  }
 }

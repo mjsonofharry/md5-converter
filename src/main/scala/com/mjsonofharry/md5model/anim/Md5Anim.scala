@@ -45,7 +45,6 @@ object Md5Anim {
         val (i: Int, others: List[Hierarchy]) = acc
         val (joint: Joint, channels: List[Channel]) = next
         val numAttributes = channels
-          .filter(_.keys.size > 1)
           .map(_.attribute)
           .toSet
           .size
@@ -96,7 +95,7 @@ object Md5Anim {
           List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
             .map {
               case List(x, y, z, yaw, pitch, roll) => {
-                FramePart(joint, x, y, z, Quaternion.normalized(Quaternion.from_euler3(yaw, pitch, roll)))
+                FramePart(joint, x, y, z, Quaternion.normalized(Quaternion.from_euler2(yaw, pitch, roll)))
               }
             }
 
@@ -157,7 +156,7 @@ object Md5Anim {
     val convertedBaseFrame = baseFrame
       .map(
         f =>
-          s"( ${f.x} ${f.y} ${f.z} ) ( ${f.orientation.x} ${f.orientation.y} ${f.orientation.z} )"
+          s"( ${f.x} ${f.y} ${f.z} ) ( ${format(f.orientation.x)} ${format(f.orientation.y)} ${format(f.orientation.z)} )"
       )
       .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n\n")
 
