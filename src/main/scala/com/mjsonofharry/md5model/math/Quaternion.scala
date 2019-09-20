@@ -93,6 +93,7 @@ object Quaternion {
     Quaternion(w, x, y, z)
   }
 
+  // https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToMatrix/index.htm
   def from_euler4(yaw: Double, pitch: Double, roll: Double): Quaternion = {
     val r = Math.PI / 180
     val heading = yaw * r
