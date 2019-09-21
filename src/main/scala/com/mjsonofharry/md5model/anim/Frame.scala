@@ -4,12 +4,14 @@ import com.mjsonofharry.md5model.mesh.Joint
 import com.mjsonofharry.md5model.math.Quaternion
 import com.mjsonofharry.md5model.utils.Utils._
 
+case class AttributeFlags(x: Boolean, y: Boolean, z: Boolean, qx: Boolean, qy: Boolean, qz: Boolean)
+
 case class FramePart(
     joint: Joint,
     x: Double,
     y: Double,
     z: Double,
-    orientation: Quaternion
+    orientation: Quaternion,
 )
 
 case class Frame(index: Int, values: List[FramePart])

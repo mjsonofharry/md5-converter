@@ -23,24 +23,18 @@ object Md5Anim {
   val BOUNDS_MIN: JointName = "boundsMin"
   val BOUNDS_MAX: JointName = "boundsMax"
 
-  def mapJointsToChannels(
-      channels: List[Channel],
-      joints: List[Joint]
-  ): List[(Joint, List[Channel])] = {
-    val jointTable: Map[String, Joint] = joints.map((j) => (j.name, j)).toMap
-    channels
+  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
+    val maxRange: Int = md5anim.channels.map(_.range._2).max
+    val jointTable: Map[String, Joint] =
+      md5mesh.joints.map((j) => (j.name, j)).toMap
+    val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
       .filterNot(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
       .groupBy(_.jointName)
       .toList
       .map((g) => (jointTable(g._1), g._2))
       .sortBy(_._1.index)
-  }
 
-  def constructHierarchy(
-      jointChannels: List[(Joint, List[Channel])],
-      maxRange: Int
-  ): List[Hierarchy] =
-    jointChannels
+    val hierarchy: List[Hierarchy] = jointChannels
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
         val (i: Int, others: List[Hierarchy]) = acc
         val (joint: Joint, channels: List[Channel]) = next
@@ -52,19 +46,19 @@ object Md5Anim {
       })
       ._2
 
-  def computeBounds(channels: List[Channel], maxRange: Int) = {
-    val boundChannels: List[(JointName, (AttributeName, List[Key]))] = channels
-      .filter(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
-      .map(
-        c =>
-          (
-            c.jointName: JointName,
-            (c.attribute: AttributeName, padKeys(c.keys, c.range, maxRange))
-          )
-      )
+    val boundChannels: List[(JointName, (AttributeName, List[Double]))] =
+      md5anim.channels
+        .filter(c => Set(BOUNDS_MIN, BOUNDS_MAX).contains(c.jointName))
+        .map(
+          c =>
+            (
+              c.jointName: JointName,
+              (c.attribute: AttributeName, padKeys(c.keys, c.range, maxRange))
+            )
+        )
     val boundsMin = boundChannels.filter(_._1 == BOUNDS_MIN).map(_._2).toMap
     val boundsMax = boundChannels.filter(_._1 == BOUNDS_MAX).map(_._2).toMap
-    List(
+    val bounds: List[Bound] = List(
       boundsMin("x"),
       boundsMin("y"),
       boundsMin("z"),
@@ -72,12 +66,7 @@ object Md5Anim {
       boundsMax("y"),
       boundsMax("z")
     ).transpose.map(Bound(_))
-  }
 
-  def computeFrames(
-      jointChannels: List[(Joint, List[Channel])],
-      maxRange: Int
-  ): List[Frame] = {
     val jointValues: List[(Joint, List[FramePart])] = jointChannels.map {
       case (joint: Joint, channels: List[Channel]) => {
         val channelMap = channels.map(c => (c.attribute, c)).toMap
@@ -90,20 +79,21 @@ object Md5Anim {
         val yawKeys: List[Double] = attributeKeys("yaw")
         val pitchKeys: List[Double] = attributeKeys("pitch")
         val rollKeys: List[Double] = attributeKeys("roll")
-
         val keys: List[FramePart] =
           List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
             .map {
               case List(x, y, z, yaw, pitch, roll) => {
-                FramePart(joint, x, y, z, Quaternion.normalized(Quaternion.from_euler2(yaw, pitch, roll)))
+                val r = Math.PI / 180
+                val orientation =
+                  Quaternion.normalized(Quaternion.from_euler5(yaw * r, pitch * r, roll * r))
+                FramePart(joint, x, y, z, orientation)
               }
             }
 
         (joint, keys)
       }
     }
-
-    val frames = { 0 until maxRange }.toList
+    val frames: List[Frame] = { 0 until maxRange }.toList
       .map(frameIndex => {
         Frame(frameIndex, jointValues.map {
           case (joint: Joint, frameParts: List[FramePart]) => {
@@ -111,27 +101,9 @@ object Md5Anim {
           }
         })
       })
-    frames
-  }
 
-  def firstFrame(frames: List[Frame]): List[FramePart] = frames.head.values
+    val baseFrame: List[FramePart] = frames.head.values
 
-  def defaultFrame(md5mesh: Md5Mesh): List[FramePart] =
-    md5mesh.joints
-      .sortBy(_.index)
-      .map(j => {
-        val List(x: Double, y: Double, z: Double) = j.position
-        FramePart(j, x, y, z, j.orientation)
-      })
-
-  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
-    val maxRange: Int = md5anim.channels.map(_.range._2).max
-    val jointChannels: List[(Joint, List[Channel])] =
-      mapJointsToChannels(md5anim.channels, md5mesh.joints)
-    val hierarchy: List[Hierarchy] = constructHierarchy(jointChannels, maxRange)
-    val bounds: List[Bound] = computeBounds(md5anim.channels, maxRange)
-    val frames: List[Frame] = computeFrames(jointChannels, maxRange)
-    val baseFrame: List[FramePart] = firstFrame(frames)
     val firstChannel = md5anim.channels.head
 
     val version = "MD5Version 10\n"
@@ -156,7 +128,9 @@ object Md5Anim {
     val convertedBaseFrame = baseFrame
       .map(
         f =>
-          s"( ${f.x} ${f.y} ${f.z} ) ( ${format(f.orientation.x)} ${format(f.orientation.y)} ${format(f.orientation.z)} )"
+          s"( ${f.x} ${f.y} ${f.z} ) ( ${format(f.orientation.x)} ${format(
+            f.orientation.y
+          )} ${format(f.orientation.z)} )"
       )
       .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n\n")
 

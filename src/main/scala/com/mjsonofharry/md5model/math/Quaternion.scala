@@ -119,6 +119,22 @@ object Quaternion {
     from_matrix(List(m00, m01, m02, m10, m11, m12, m20, m21, m22))
   }
 
+  def from_euler5(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+    val sr2 = Math.sin(0.5 * roll)
+    val cr2 = Math.cos(0.5 * roll)
+    val sp2 = Math.sin(0.5 * pitch)
+    val cp2 = Math.cos(0.5 * pitch)
+    val sy2 = Math.sin(0.5 * yaw)
+    val cy2 = Math.cos(0.5 * yaw)
+    val q0 = (cr2 * cp2 * cy2) + (sr2 * sp2 * sy2)
+    val q1 = (sr2 * cp2 * cy2) - (cr2 * sp2 * sy2)
+    val q2 = (cr2 * sp2 * cy2) + (sr2 * cp2 * sy2)
+    val q3 = (cr2 * cp2 * sy2) - (sr2 * sp2 * cy2)
+
+    if (q0 >= 0) Quaternion(-q0, -q1, -q2, -q3)
+    else Quaternion(q0, q1, q2, q3)
+  }
+
   // https://www.euclideanspace.com/maths/algebra/realNormedAlgebra/quaternions/code/index.htm
   def normalized(q: Quaternion): Quaternion = {
     val n = math.sqrt((q.x * q.x) + (q.y * q.y) + (q.z * q.z) + (q.w * q.w))
