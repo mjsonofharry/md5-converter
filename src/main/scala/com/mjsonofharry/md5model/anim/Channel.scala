@@ -41,4 +41,21 @@ object Channel {
       range,
       keys
     )
+
+  def padKeys(channel: Channel, padTo: Int): List[Double] = {
+    val keys = channel.keys
+    val (start, finish) = channel.range
+    val prependTo = start + keys.size
+    val appendTo = finish
+    val prepended = keys.reverse.padTo(start + keys.size, keys.head)
+    val appended = prepended.reverse.padTo(finish, keys.last)
+    appended
+  }
+
+  def spreadKeys(channel: Channel, total: Int): List[Double] = {
+    val keys = channel.keys
+    (0 until total)
+      .map(x => keys(((x.toDouble / total) * keys.size).toInt))
+      .toList
+  }
 }

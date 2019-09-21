@@ -51,7 +51,7 @@ object Md5Anim {
           c =>
             (
               c.jointName: JointName,
-              (c.attribute: AttributeName, padKeys(c.keys, c.range, frameCount))
+              (c.attribute: AttributeName, Channel.padKeys(c, frameCount))
             )
         )
     val boundsMin = boundChannels.filter(_._1 == Bound.MIN).map(_._2).toMap
@@ -65,11 +65,11 @@ object Md5Anim {
       boundsMax("z")
     ).transpose.map(Bound(_))
 
-    val jointValues: List[(Joint, List[FramePart])] = jointChannels.map {
+    val jointFrameParts: List[List[FramePart]] = jointChannels.map {
       case (joint: Joint, channels: List[Channel]) => {
         val channelMap = channels.map(c => (c.attribute, c)).toMap
         val attributeKeys: Map[String, List[Double]] = channels
-          .map(c => (c.attribute, padKeys(c.keys, c.range, frameCount)))
+          .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
           .toMap
         val xKeys: List[Double] = attributeKeys("x")
         val yKeys: List[Double] = attributeKeys("y")
@@ -77,28 +77,12 @@ object Md5Anim {
         val yawKeys: List[Double] = attributeKeys("yaw")
         val pitchKeys: List[Double] = attributeKeys("pitch")
         val rollKeys: List[Double] = attributeKeys("roll")
-        val keys: List[FramePart] =
-          List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
-            .map {
-              case List(x, y, z, yaw, pitch, roll) => {
-                val r = Math.PI / 180
-                val orientation =
-                  Quaternion.from_euler5(yaw * r, pitch * r, roll * r)
-                FramePart(joint, x, y, z, orientation)
-              }
-            }
-
-        (joint, keys)
+        List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
+          .map(FramePart(joint, _))
       }
     }
     val frames: List[Frame] = { 0 until frameCount }.toList
-      .map(frameIndex => {
-        Frame(frameIndex, jointValues.map {
-          case (joint: Joint, frameParts: List[FramePart]) => {
-            frameParts.get(frameIndex).get
-          }
-        })
-      })
+      .map(i => Frame(i, jointFrameParts.map(_.get(i).get)))
 
     val version = "MD5Version 10\n"
     val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"

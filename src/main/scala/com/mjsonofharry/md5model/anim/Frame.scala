@@ -22,6 +22,13 @@ case class FramePart(
 )
 
 object FramePart {
+  def apply(joint: Joint, values: List[Double]): FramePart = {
+    val List(x, y, z, yaw, pitch, roll) = values
+    val r = Math.PI / 180
+    val q = Quaternion.from_euler5(yaw * r, pitch * r, roll * r)
+    FramePart(joint, x, y, z, q)
+  }
+
   def convert(framePart: FramePart): String = List(
     framePart.x,
     framePart.y,
