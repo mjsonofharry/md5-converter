@@ -85,7 +85,7 @@ object Md5Anim {
               case List(x, y, z, yaw, pitch, roll) => {
                 val r = Math.PI / 180
                 val orientation =
-                  Quaternion.normalized(Quaternion.from_euler5(yaw * r, pitch * r, roll * r))
+                  Quaternion.from_euler5(yaw * r, pitch * r, roll * r)
                 FramePart(joint, x, y, z, orientation)
               }
             }
