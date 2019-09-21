@@ -10,6 +10,9 @@ case class Bound(
 )
 
 object Bound {
+  val MIN = "boundsMin"
+  val MAX = "boundsMax"
+
   def apply(values: List[Double]): Bound = {
     val List(minX, minY, minZ, maxX, maxY, maxZ) = values
     Bound(minX, minY, minZ, maxX, maxY, maxZ)
