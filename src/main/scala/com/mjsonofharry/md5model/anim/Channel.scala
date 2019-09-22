@@ -26,7 +26,10 @@ object Channel {
     endtime <- keyValue("endtime", double)
     framerate <- keyValue("framerate", double)
     strings <- keyValue("strings", int)
-    range <- keyValue("range", { int <~ spaceChar } ~ int)
+    frames = {framerate * endtime}.toInt
+    range <- { keyValue("range", { int <~ spaceChar } ~ int) } | {
+      whitespaces >| (0, frames)
+    }
     numkeys <- keyValue("keys", int)
     keys <- manyUntil(double <~ whitespaces, char('}'))
   } yield
