@@ -32,34 +32,60 @@ object Md5Anim {
       .map((g) => (jointTable(g._1), g._2))
       .sortBy(_._1.index)
 
-    val frames: List[Frame] = jointChannels
-      .map {
-        case (joint: Joint, channels: List[Channel]) => {
-          val attributeKeys: Map[String, List[Double]] = channels
-            .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
-            .toMap
-          List(
-            attributeKeys("x"),
-            attributeKeys("y"),
-            attributeKeys("z"),
-            attributeKeys("yaw"),
-            attributeKeys("pitch"),
-            attributeKeys("roll")
-          ).transpose.map(FramePart(joint, _))
+    val jointFrameParts: List[(Joint, List[FramePart])] =
+      jointChannels
+        .map {
+          case (joint: Joint, channels: List[Channel]) => {
+            val attributes: Map[String, List[Double]] = channels
+              .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
+              .toMap
+            val values: List[List[Double]] = List(
+              attributes("x"),
+              attributes("y"),
+              attributes("z"),
+              attributes("yaw"),
+              attributes("pitch"),
+              attributes("roll")
+            ).transpose
+              .map(components => {
+                val List(x, y, z, yaw, pitch, roll) = components
+                val r = Math.PI / 180
+                val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
+                List(x, y, z, q.x, q.y, q.z, q.w)
+              })
+              .transpose
+            val flags: AttributeFlags =
+              AttributeFlags(values.take(6).map(_.distinct.size > 1))
+            val parts: List[FramePart] = values.transpose.map(components => {
+              val List(x, y, z, qx, qy, qz, qw) = components
+              val q = Quaternion(qw, qx, qy, qz)
+              FramePart(joint, flags, x, y, z, q)
+            })
+            (joint, parts)
+          }
         }
-      }
+
+    val frames: List[Frame] = jointFrameParts
+      .map(_._2)
       .transpose
       .zipWithIndex
       .map { case ((parts: List[FramePart], i: Int)) => Frame(i, parts) }
 
-    val hierarchy: List[Hierarchy] = jointChannels
+    val hierarchy: List[Hierarchy] = jointFrameParts
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
         val (i: Int, others: List[Hierarchy]) = acc
-        val (joint: Joint, channels: List[Channel]) = next
-        val numAttributes = 6
-        val flags = List(true, true, true, true, true, true)
+        val (joint: Joint, parts: List[FramePart]) = next
+        val flags = parts.head.flags.values
+        val numAttributes = flags.filter(fl => fl).size
+        val startIndex = if (numAttributes > 0) i else 0
         val row =
-          Hierarchy(joint.name, joint.parentName, joint.parentIndex, flags, i)
+          Hierarchy(
+            joint.name,
+            joint.parentName,
+            joint.parentIndex,
+            flags,
+            startIndex
+          )
         (i + numAttributes, others :+ row)
       })
       ._2
@@ -85,10 +111,8 @@ object Md5Anim {
     val numFrames = s"numFrames ${frameCount}\n"
     val numJoints = s"numJoints ${md5mesh.joints.size}\n"
     val frameRate = s"frameRate ${fps}\n"
-    // val numAnimatedComponents =
-    //   s"numAnimatedComponents ${hierarchy.flatMap(_.attributes).size}\n\n"
     val numAnimatedComponents =
-      s"numAnimatedComponents ${hierarchy.size * 6}\n\n"
+      s"numAnimatedComponents ${hierarchy.flatMap(_.flags).filter(fl => fl).size}\n\n"
 
     val hierarchyBlock: String = hierarchy
       .map(Hierarchy.convert)

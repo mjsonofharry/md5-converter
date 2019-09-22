@@ -6,6 +6,7 @@ import com.mjsonofharry.md5model.utils.Utils._
 
 case class FramePart(
     joint: Joint,
+    flags: AttributeFlags,
     x: Double,
     y: Double,
     z: Double,
@@ -13,21 +14,15 @@ case class FramePart(
 )
 
 object FramePart {
-  def apply(joint: Joint, values: List[Double]): FramePart = {
-    val List(x, y, z, yaw, pitch, roll) = values
-    val r = Math.PI / 180
-    val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
-    FramePart(joint, x, y, z, q)
-  }
-
-  def convert(f: FramePart): String = List(
-    f.x,
-    f.y,
-    f.z,
-    f.orientation.x,
-    f.orientation.y,
-    f.orientation.z
-  ).map(format).mkString(" ")
+  def convert(f: FramePart): String =
+    List(
+      f.x,
+      f.y,
+      f.z,
+      f.orientation.x,
+      f.orientation.y,
+      f.orientation.z
+    ).zip(f.flags.values).filter(_._2).map(_._1).map(format).mkString(" ")
 
   def baseConvert(f: FramePart): String = {
     val ts = List(

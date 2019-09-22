@@ -29,9 +29,18 @@ object Hierarchy {
       .reduce(_ + _)
 
   def convert(hierarchy: Hierarchy): String = {
-    val comment = s"// ${hierarchy.parentJointName} ( Tx Ty Tz Qx Qy Qz)"
+    val attributes =
+      List("Tx", "Ty", "Tz", "Qx", "Qy", "Qz")
+        .zip(hierarchy.flags)
+        .filter(_._2)
+        .map(_._1)
+    val formattedAttributes =
+      if (attributes.size > 0)
+        attributes.mkString(start = "( ", sep = " ", end = " )")
+      else ""
+    val comment = s"// ${hierarchy.parentJointName} ${formattedAttributes}"
     val flags = bin2int(
-      hierarchy.flags.map(fl => if (fl) "1" else "0").reduce(_ + _)
+      hierarchy.flags.map(fl => if (fl) "1" else "0").reduce(_ + _).reverse
     )
     s"${QUOTE}${hierarchy.jointName}${QUOTE}\t${hierarchy.parentJointIndex} ${flags} ${hierarchy.startIndex}\t${comment}"
   }
