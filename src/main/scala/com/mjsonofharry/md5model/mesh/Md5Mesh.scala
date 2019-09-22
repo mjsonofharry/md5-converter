@@ -28,15 +28,16 @@ object Md5Mesh {
   } yield Md5Mesh(commandline, numbones, nummeshes, joints, meshes)
 
   def convert(md5Mesh: Md5Mesh): String = {
-    val version = "MD5Version 10\n"
-    val commandline = s"commandline ${quotate(md5Mesh.commandline)}\n\n"
-    val numJoints = s"numJoints ${md5Mesh.numbones}\n"
-    val numMeshes = s"numMeshes ${md5Mesh.nummeshes}\n\n"
+    val version = "MD5Version 10"
+    val commandline = s"commandline ${quotate(md5Mesh.commandline)}\n"
+    val numJoints = s"numJoints ${md5Mesh.numbones}"
+    val numMeshes = s"numMeshes ${md5Mesh.nummeshes}\n"
     val jointBlock = md5Mesh.joints
       .map(Joint.convert)
-      .mkString(start = "joints {\n\t", sep = "\n\t", end = "\n}\n\n")
+      .mkString(start = "joints {\n\t", sep = "\n\t", end = "\n}\n")
     val meshBlocks = md5Mesh.meshes.map(Mesh.convert).mkString("\n")
 
-    version + commandline + numJoints + numMeshes + jointBlock + meshBlocks
+    List(version, commandline, numJoints, numMeshes, jointBlock, meshBlocks)
+      .mkString("\n")
   }
 }

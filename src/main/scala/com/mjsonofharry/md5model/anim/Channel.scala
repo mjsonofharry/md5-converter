@@ -26,7 +26,7 @@ object Channel {
     endtime <- keyValue("endtime", double)
     framerate <- keyValue("framerate", double)
     strings <- keyValue("strings", int)
-    frames = {framerate * endtime}.toInt
+    frames = { framerate * endtime }.toInt
     range <- { keyValue("range", { int <~ spaceChar } ~ int) } | {
       whitespaces >| (0, frames)
     }

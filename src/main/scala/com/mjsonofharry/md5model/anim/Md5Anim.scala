@@ -54,10 +54,9 @@ object Md5Anim {
                 val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
                 List(x, y, z, q.x, q.y, q.z, q.w)
               })
-              .transpose
             val flags: AttributeFlags =
-              AttributeFlags(values.take(6).map(_.distinct.size > 1))
-            val parts: List[FramePart] = values.transpose.map(components => {
+              AttributeFlags(values.transpose.take(6).map(_.distinct.size > 1))
+            val parts: List[FramePart] = values.map(components => {
               val List(x, y, z, qx, qy, qz, qw) = components
               val q = Quaternion(qw, qx, qy, qz)
               FramePart(joint, flags, x, y, z, q)
@@ -108,31 +107,40 @@ object Md5Anim {
       } yield List(minX, minY, minZ, maxX, maxY, maxZ).transpose.map(Bound(_))
     }.getOrElse(Nil)
 
-    val version = "MD5Version 10\n"
-    val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"
+    val version = "MD5Version 10"
+    val commandline = s"commandline ${quotate(md5anim.commandline)}\n"
     val firstChannel = md5anim.channels.head
-    val numFrames = s"numFrames ${frameCount}\n"
-    val numJoints = s"numJoints ${md5mesh.joints.size}\n"
-    val frameRate = s"frameRate ${fps}\n"
+    val numFrames = s"numFrames ${frameCount}"
+    val numJoints = s"numJoints ${md5mesh.joints.size}"
+    val frameRate = s"frameRate ${fps}"
     val numAnimatedComponents =
-      s"numAnimatedComponents ${hierarchy.flatMap(_.flags).filter(fl => fl).size}\n\n"
+      s"numAnimatedComponents ${hierarchy.flatMap(_.flags).filter(fl => fl).size}\n"
 
     val hierarchyBlock: String = hierarchy
       .map(Hierarchy.convert)
-      .mkString(start = "hierarchy {\n\t", sep = "\n\t", end = "\n}\n\n")
+      .mkString(start = "hierarchy {\n\t", sep = "\n\t", end = "\n}\n")
 
     val boundsBlock: String = bounds
       .map(Bound.convert)
-      .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n\n")
+      .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n")
 
     val baseFrameBlock: String = frames.head.values
       .map(FramePart.baseConvert)
-      .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n\n")
+      .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n")
 
-    val frameBlocks: String = frames
-      .map(Frame.convert)
-      .mkString(start = "\n", sep = "\n\n", end = "\n")
+    val frameBlocks: String = frames.map(Frame.convert).mkString("\n\n")
 
-    version + commandline + numFrames + numJoints + frameRate + numAnimatedComponents + hierarchyBlock + boundsBlock + baseFrameBlock + frameBlocks
+    List(
+      version,
+      commandline,
+      numFrames,
+      numJoints,
+      frameRate,
+      numAnimatedComponents,
+      hierarchyBlock,
+      boundsBlock,
+      baseFrameBlock,
+      frameBlocks
+    ).mkString("\n")
   }
 }
