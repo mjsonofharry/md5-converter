@@ -29,7 +29,8 @@ object Md5Anim {
       .filterNot(c => Set(Bound.MIN, Bound.MAX).contains(c.jointName))
       .groupBy(_.jointName)
       .toList
-      .map((g) => (jointTable(g._1), g._2))
+      .map((g) => (jointTable.get(g._1), g._2))
+      .collect { case ((Some(joint), channels)) => (joint, channels) }
       .sortBy(_._1.index)
 
     val jointFrameParts: List[(Joint, List[FramePart])] =
@@ -96,14 +97,16 @@ object Md5Anim {
         .map(c => (c.jointName, (c.attribute, Channel.padKeys(c, frameCount))))
     val boundsMin = boundChannels.filter(_._1 == Bound.MIN).map(_._2).toMap
     val boundsMax = boundChannels.filter(_._1 == Bound.MAX).map(_._2).toMap
-    val bounds: List[Bound] = List(
-      boundsMin("x"),
-      boundsMin("y"),
-      boundsMin("z"),
-      boundsMax("x"),
-      boundsMax("y"),
-      boundsMax("z")
-    ).transpose.map(Bound(_))
+    val bounds = {
+      for {
+        minX <- boundsMin.get("x")
+        minY <- boundsMin.get("y")
+        minZ <- boundsMin.get("z")
+        maxX <- boundsMax.get("x")
+        maxY <- boundsMax.get("y")
+        maxZ <- boundsMax.get("z")
+      } yield List(minX, minY, minZ, maxX, maxY, maxZ).transpose.map(Bound(_))
+    }.getOrElse(Nil)
 
     val version = "MD5Version 10\n"
     val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"
