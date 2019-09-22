@@ -12,11 +12,17 @@ Convert md5mesh and md5anim formats from version 6 to version 10.
 
 This is still early in development but jars are on the way. For now:
 
-`sbt run <path to input md5mesh> <path to output md5mesh>`
+`sbt run <source directory> <destination directory>`
+
+The source directory should contain exactly one md5mesh file and one or more md5anim files. Converted mesh and animation files will be written to the destination directory.
+
+## Thank you
+
+To Jack Henahan ([@jhenahan](https://github.com/jhenahan)) for introducing me to parsers and helping me understand the math.
 
 ## Notice
 
-The conversions in [Quaternion.scala](src/main/scala/com/mjsonofharry/md5model/math/Quaternion.scala) are ported from [NiPy](https://github.com/nipy/nibabel/blob/master/nibabel/quaternions.py).
+The matrix to quaternion conversion function in [Quaternion.scala](src/main/scala/com/mjsonofharry/md5model/math/Quaternion.scala) is ported from [NiPy](https://github.com/nipy/nibabel/blob/master/nibabel/quaternions.py).
 
 The entirety of [Eig.scala](src/main/scala/com/mjsonofharry/md5model/math/Eig.scala) is modified from [Breeze](https://github.com/scalanlp/breeze/blob/master/math/src/main/scala/breeze/linalg/functions/eig.scala).
 
@@ -25,3 +31,5 @@ The entirety of [Eig.scala](src/main/scala/com/mjsonofharry/md5model/math/Eig.sc
 [MD5Mesh and MD5Anim files formats](http://tfc.duke.free.fr/coding/md5-specs-en.html)
 
 [Unofficial DoomIII model specs v0.1](https://www.doomworld.com/forum/topic/57897-alpha-shotgun-mod/?page=4&tab=comments#comment-1581404)
+
+[EuclideanSpace - Mathematics and Computing](https://www.euclideanspace.com/)
