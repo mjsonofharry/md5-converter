@@ -25,29 +25,29 @@ object FramePart {
   def apply(joint: Joint, values: List[Double]): FramePart = {
     val List(x, y, z, yaw, pitch, roll) = values
     val r = Math.PI / 180
-    val q = Quaternion.from_euler5(yaw * r, pitch * r, roll * r)
+    val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
     FramePart(joint, x, y, z, q)
   }
 
-  def convert(framePart: FramePart): String = List(
-    framePart.x,
-    framePart.y,
-    framePart.z,
-    framePart.orientation.x,
-    framePart.orientation.y,
-    framePart.orientation.z
+  def convert(f: FramePart): String = List(
+    f.x,
+    f.y,
+    f.z,
+    f.orientation.x,
+    f.orientation.y,
+    f.orientation.z
   ).map(format).mkString(" ")
 
-  def baseConvert(framePart: FramePart): String = {
+  def baseConvert(f: FramePart): String = {
     val ts = List(
-      framePart.x,
-      framePart.y,
-      framePart.z
+      f.x,
+      f.y,
+      f.z
     ).map(format).mkString(" ")
     val qs = List(
-      framePart.orientation.x,
-      framePart.orientation.y,
-      framePart.orientation.z
+      f.orientation.x,
+      f.orientation.y,
+      f.orientation.z
     ).map(format).mkString(" ")
     s"( ${ts} ) ( ${qs} )"
   }

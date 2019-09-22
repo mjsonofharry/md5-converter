@@ -1,4 +1,5 @@
 package com.mjsonofharry.md5model.anim
+import com.mjsonofharry.md5model.utils.Utils._
 
 case class Bound(
     minX: Double,
@@ -18,6 +19,17 @@ object Bound {
     Bound(minX, minY, minZ, maxX, maxY, maxZ)
   }
 
-  def convert(bound: Bound): String =
-    s"( ${bound.minX} ${bound.minY} ${bound.minZ} ) ( ${bound.maxX} ${bound.maxY} ${bound.maxZ} )"
+  def convert(bound: Bound): String = {
+    val minBounds = List(
+      bound.minX,
+      bound.minX,
+      bound.minZ
+    ).map(format).mkString(" ")
+    val maxBounds = List(
+      bound.maxX,
+      bound.maxY,
+      bound.maxZ
+    ).map(format).mkString(" ")
+    s"( ${minBounds} ) ( ${maxBounds} )"
+  }
 }

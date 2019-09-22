@@ -32,6 +32,26 @@ object Md5Anim {
       .map((g) => (jointTable(g._1), g._2))
       .sortBy(_._1.index)
 
+    val frames: List[Frame] = jointChannels
+      .map {
+        case (joint: Joint, channels: List[Channel]) => {
+          val attributeKeys: Map[String, List[Double]] = channels
+            .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
+            .toMap
+          List(
+            attributeKeys("x"),
+            attributeKeys("y"),
+            attributeKeys("z"),
+            attributeKeys("yaw"),
+            attributeKeys("pitch"),
+            attributeKeys("roll")
+          ).transpose.map(FramePart(joint, _))
+        }
+      }
+      .transpose
+      .zipWithIndex
+      .map { case ((parts: List[FramePart], i: Int)) => Frame(i, parts) }
+
     val hierarchy: List[Hierarchy] = jointChannels
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
         val (i: Int, others: List[Hierarchy]) = acc
@@ -44,16 +64,10 @@ object Md5Anim {
       })
       ._2
 
-    val boundChannels: List[(JointName, (AttributeName, List[Double]))] =
+    val boundChannels: List[(String, (String, List[Double]))] =
       md5anim.channels
         .filter(c => Set(Bound.MIN, Bound.MAX).contains(c.jointName))
-        .map(
-          c =>
-            (
-              c.jointName: JointName,
-              (c.attribute: AttributeName, Channel.padKeys(c, frameCount))
-            )
-        )
+        .map(c => (c.jointName, (c.attribute, Channel.padKeys(c, frameCount))))
     val boundsMin = boundChannels.filter(_._1 == Bound.MIN).map(_._2).toMap
     val boundsMax = boundChannels.filter(_._1 == Bound.MAX).map(_._2).toMap
     val bounds: List[Bound] = List(
@@ -64,25 +78,6 @@ object Md5Anim {
       boundsMax("y"),
       boundsMax("z")
     ).transpose.map(Bound(_))
-
-    val jointFrameParts: List[List[FramePart]] = jointChannels.map {
-      case (joint: Joint, channels: List[Channel]) => {
-        val channelMap = channels.map(c => (c.attribute, c)).toMap
-        val attributeKeys: Map[String, List[Double]] = channels
-          .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
-          .toMap
-        val xKeys: List[Double] = attributeKeys("x")
-        val yKeys: List[Double] = attributeKeys("y")
-        val zKeys: List[Double] = attributeKeys("z")
-        val yawKeys: List[Double] = attributeKeys("yaw")
-        val pitchKeys: List[Double] = attributeKeys("pitch")
-        val rollKeys: List[Double] = attributeKeys("roll")
-        List(xKeys, yKeys, zKeys, yawKeys, pitchKeys, rollKeys).transpose
-          .map(FramePart(joint, _))
-      }
-    }
-    val frames: List[Frame] = { 0 until frameCount }.toList
-      .map(i => Frame(i, jointFrameParts.map(_.get(i).get)))
 
     val version = "MD5Version 10\n"
     val commandline = s"commandline ${quotate(md5anim.commandline)}\n\n"

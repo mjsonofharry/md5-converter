@@ -4,8 +4,8 @@ import com.mjsonofharry.md5model.mesh.Joint
 import com.mjsonofharry.md5model.utils.Utils._
 
 case class Hierarchy(
-    jointName: JointName,
-    parentJointName: JointName,
+    jointName: String,
+    parentJointName: String,
     parentJointIndex: Int,
     flags: List[Boolean],
     startIndex: Int

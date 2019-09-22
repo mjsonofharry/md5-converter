@@ -52,74 +52,7 @@ object Quaternion {
     Quaternion(w, x, y, z)
   }
 
-  // from https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
-  def from_euler2(yaw: Double, pitch: Double, roll: Double): Quaternion = {
-    val r = Math.PI / 180
-    val heading = yaw * r
-    val attitude = pitch * r
-    val bank = roll * r
-    val c1 = Math.cos(heading / 2);
-    val s1 = Math.sin(heading / 2);
-    val c2 = Math.cos(attitude / 2);
-    val s2 = Math.sin(attitude / 2);
-    val c3 = Math.cos(bank / 2);
-    val s3 = Math.sin(bank / 2);
-    val c1c2 = c1 * c2;
-    val s1s2 = s1 * s2;
-    val w = (c1c2 * c3) - (s1s2 * s3);
-  	val x = (c1c2 * s3) + (s1s2 * c3);
-    val y = (s1 * c2 * c3) + (c1 * s2 * s3);
-    val z = (c1 * s2 * c3) - (s1 * c2 * s3);
-    Quaternion(w, x, y, z)
-  }
-
-  // from https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToQuaternion/index.htm
-  def from_euler3(yaw: Double, pitch: Double, roll: Double): Quaternion = {
-    val r = Math.PI / 180
-    val heading = yaw * r
-    val attitude = pitch * r
-    val bank = roll * r
-    val c1 = Math.cos(heading)
-    val s1 = Math.sin(heading)
-    val c2 = Math.cos(attitude)
-    val s2 = Math.sin(attitude)
-    val c3 = Math.cos(bank)
-    val s3 = Math.sin(bank)
-    val w = Math.sqrt(1.0 + (c1 * c2) + (c1 * c3) - (s1 * s2 * s3) + (c2 * c3)) / 2.0
-    val w4 = 4.0 * w
-    val x = ((c2 * s3) + (c1 * s3) + (s1 * s2 * c3)) / w4
-    val y = ((s1 * c2) + (s1 * c3) + (c1 * s2 * s3)) / w4
-    val z = ((-s1 * s3) + (c1 * s2 * c3) +s2) / w4
-    Quaternion(w, x, y, z)
-  }
-
-  // https://www.euclideanspace.com/maths/geometry/rotations/conversions/eulerToMatrix/index.htm
-  def from_euler4(yaw: Double, pitch: Double, roll: Double): Quaternion = {
-    val r = Math.PI / 180
-    val heading = yaw * r
-    val attitude = pitch * r
-    val bank = roll * r
-    val ch = Math.cos(heading);
-    val sh = Math.sin(heading);
-    val ca = Math.cos(attitude);
-    val sa = Math.sin(attitude);
-    val cb = Math.cos(bank);
-    val sb = Math.sin(bank);
-
-    val m00 = ch * ca;
-    val m01 = sh*sb - ch*sa*cb;
-    val m02 = ch*sa*sb + sh*cb;
-    val m10 = sa;
-    val m11 = ca*cb;
-    val m12 = -ca*sb;
-    val m20 = -sh*ca;
-    val m21 = sh*sa*cb + ch*sb;
-    val m22 = -sh*sa*sb + ch*cb;
-
-    from_matrix(List(m00, m01, m02, m10, m11, m12, m20, m21, m22))
-  }
-
-  def from_euler5(yaw: Double, pitch: Double, roll: Double): Quaternion = {
+  def from_euler(yaw: Double, pitch: Double, roll: Double): Quaternion = {
     val sr2 = Math.sin(0.5 * roll)
     val cr2 = Math.cos(0.5 * roll)
     val sp2 = Math.sin(0.5 * pitch)

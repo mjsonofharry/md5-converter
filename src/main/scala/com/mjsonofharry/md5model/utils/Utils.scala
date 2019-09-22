@@ -5,10 +5,6 @@ import cats.implicits._
 import java.text.DecimalFormat
 
 object Utils {
-  type Key = Double
-  type JointName = String
-  type AttributeName = String
-
   val QUOTE = '"'
   def quotate(inside: String): String = QUOTE + inside + QUOTE
   def keyValue[T](key: String, valueParser: Parser[T]) =

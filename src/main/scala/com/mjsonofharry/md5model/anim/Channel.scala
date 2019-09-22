@@ -7,14 +7,14 @@ import com.mjsonofharry.md5model.utils.Utils._
 
 case class Channel(
     index: Int,
-    jointName: JointName,
-    attribute: AttributeName,
+    jointName: String,
+    attribute: String,
     starttime: Double,
     endtime: Double,
     framerate: Double,
     strings: Int,
     range: (Int, Int),
-    keys: List[Key]
+    keys: List[Double]
 )
 
 object Channel {
