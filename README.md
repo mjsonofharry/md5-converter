@@ -4,19 +4,11 @@
 
 Convert md5mesh and md5anim formats from version 6 to version 10.
 
-## Build
+## Usage
 
 `java -jar md5-converter <input directory> <output directory>`
 
 The **input directory** is a folder containing at least one md5mesh file and one or more md5anim files, and the **output directory** is the location that you want to write converted files to.
-
-## Usage
-
-This is still early in development but jars are on the way. For now:
-
-`sbt run <source directory> <destination directory>`
-
-The source directory should contain exactly one md5mesh file and one or more md5anim files. Converted mesh and animation files will be written to the destination directory.
 
 ## Thank you
 
