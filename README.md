@@ -4,6 +4,8 @@
 
 Convert md5mesh and md5anim formats from version 6 to version 10.
 
+![idle animation](idle.gif)
+
 ## Usage
 
 `java -jar md5-converter <input directory> <output directory>`
