@@ -12,7 +12,7 @@ case class Channel(
     starttime: Double,
     endtime: Double,
     framerate: Double,
-    strings: Int,
+    strings: List[String],
     range: (Int, Int),
     keys: List[Double]
 )
@@ -25,13 +25,12 @@ object Channel {
     starttime <- keyValue("starttime", double)
     endtime <- keyValue("endtime", double)
     framerate <- keyValue("framerate", double)
-    strings <- keyValue("strings", int)
+    strings <- { keyValue("strings", int) ~> many(inQuotes <~ whitespaces) } | { whitespaces >| List("")}
     frames = { framerate * endtime }.toInt
     range <- { keyValue("range", { int <~ spaceChar } ~ int) } | {
       whitespaces >| (0, frames)
     }
-    numkeys <- keyValue("keys", int)
-    keys <- manyUntil(double <~ whitespaces, char('}'))
+    keys <- keyValue("keys", int) ~> manyUntil(double <~ whitespaces, char('}'))
   } yield
     Channel(
       index,
