@@ -9,27 +9,42 @@ import atto.ParseResult.Done
 
 import com.mjsonofharry.md5model.mesh.Md5Mesh
 import com.mjsonofharry.md5model.anim.Md5Anim
+import atto.ParseResult.Fail
+import atto.ParseResult.Partial
 
-final case class NoMeshFoundException(
+final case class ConverterInputException(
+    private val message: String = "",
+    private val cause: Throwable = None.orNull
+) extends Exception(message, cause)
+
+final case class ConversionException(
     private val message: String = "",
     private val cause: Throwable = None.orNull
 ) extends Exception(message, cause)
 
 object Md5MeshConverter {
   def main(args: Array[String]): Unit = {
-    val cwd: String = Paths.get("").toAbsolutePath().toString()
-    val sourcePath: String = Paths.get(cwd, args(0)).toString()
-    val destinationPath: String = Paths.get(cwd, args(1)).toString()
+    val sourcePath: String = Paths.get(args(0)).toAbsolutePath().toString()
+    val destinationPath: String = Paths.get(args(1)).toAbsolutePath().toString()
 
     val source: File = new File(sourcePath)
+    if (!source.isDirectory())
+      throw new ConverterInputException(s"${sourcePath} is not a directory")
     val sourceFiles: List[String] = Option(source.listFiles()) match {
       case Some(files) =>
         files.filter(_.isFile()).map(_.getAbsolutePath()).toList
       case None => throw new NoSuchFileException(sourcePath)
     }
-    val meshPath: String = sourceFiles.find(_.endsWith(".md5mesh")) match {
-      case Some(path) => path
-      case None       => throw new NoMeshFoundException(sourcePath)
+    val meshPath: String = sourceFiles.filter(_.endsWith(".md5mesh")) match {
+      case head :: Nil => head
+      case Nil =>
+        throw new ConverterInputException(
+          s"Expected to find exactly 1 mesh in ${sourcePath} but found none"
+        )
+      case meshes =>
+        throw new ConverterInputException(
+          s"Expected to find exactly 1 mesh in ${sourcePath} but found ${meshes.size}"
+        )
     }
     val animPaths: List[String] =
       sourceFiles.filter(_.endsWith(".md5anim")).toList
@@ -38,9 +53,7 @@ object Md5MeshConverter {
     if (!destination.exists()) destination.mkdirs()
 
     println(s"Mesh:\n  ${meshPath}")
-    println(
-      s"Anims:\n${animPaths.mkString(start = "  ", sep = "\n  ", end = "")}"
-    )
+    println(animPaths.mkString(start = "Anims:\n  ", sep = "\n  ", end = ""))
     println(s"Destination:\n  ${destination}")
 
     val meshName: String = Paths.get(meshPath).getFileName().toString()
@@ -71,9 +84,23 @@ object Md5MeshConverter {
               animOutput.write(convertedAnim)
               animOutput.close
             }
+            case Fail(input, stack, message) =>
+              throw new ConversionException(
+                s"Animation ${animName} could not be parsed: ${message}"
+              )
+            case Partial(k) =>
+              throw new ConversionException(
+                s"Animation ${animName} was only partially parsed (should error not be possible)"
+              )
           }
         })
       }
+      case Fail(input, stack, message) =>
+        ConversionException(s"Mesh ${meshName} could not be parsed: ${message}")
+      case Partial(k) =>
+        throw new ConversionException(
+          s"Mesh ${meshName} was only partially parsed (should error not be possible)"
+        )
     }
   }
 }
