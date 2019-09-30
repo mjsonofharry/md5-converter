@@ -7,6 +7,11 @@ import com.mjsonofharry.md5model.mesh.{Md5Mesh, Joint}
 import com.mjsonofharry.md5model.utils.Utils._
 import com.mjsonofharry.md5model.math.Quaternion
 
+final case class AnimConversionException(
+    private val message: String = "",
+    private val cause: Throwable = None.orNull
+) extends Exception(message, cause)
+
 case class Md5Anim(
     commandline: String,
     numchannels: Int,
@@ -47,13 +52,12 @@ object Md5Anim {
               attributes("yaw"),
               attributes("pitch"),
               attributes("roll")
-            ).transpose
-              .map(components => {
-                val List(x, y, z, yaw, pitch, roll) = components
-                val r = Math.PI / 180
-                val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
-                List(x, y, z, q.x, q.y, q.z, q.w)
-              })
+            ).transpose.map(components => {
+              val List(x, y, z, yaw, pitch, roll) = components
+              val r = Math.PI / 180
+              val q = Quaternion.from_euler(yaw * r, pitch * r, roll * r)
+              List(x, y, z, q.x, q.y, q.z, q.w)
+            })
             val flags: AttributeFlags =
               AttributeFlags(values.transpose.take(6).map(_.distinct.size > 1))
             val parts: List[FramePart] = values.map(components => {
@@ -124,9 +128,16 @@ object Md5Anim {
       .map(Bound.convert)
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n")
 
-    val baseFrameBlock: String = frames.head.values
-      .map(FramePart.baseConvert)
-      .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n")
+    val baseFrameBlock: String = frames match {
+      case head :: _ =>
+        head.values
+          .map(FramePart.baseConvert)
+          .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n")
+      case Nil =>
+        throw new AnimConversionException(
+          "Could not derive any frames from the animation channels"
+        )
+    }
 
     val frameBlocks: String = frames.map(Frame.convert).mkString("\n\n")
 
