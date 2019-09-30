@@ -3,6 +3,7 @@ package com.mjsonofharry.md5model.utils
 import atto._, Atto._
 import cats.implicits._
 import java.text.DecimalFormat
+import java.util.Locale
 
 object Utils {
   val QUOTE = '"'
@@ -15,6 +16,13 @@ object Utils {
     manyN(n, valueParser <~ { spaceChar || whitespaces })
   val whitespaces = many(whitespace)
 
-  private val decimalFormatter = new DecimalFormat("#.##########")
-  def format(x: Double) = decimalFormatter.format(x)
+
+  def format(x: Double): String = x.toLong match {
+    case x1 if x1 == x => "%d".formatLocal(Locale.ROOT, x1)
+    case _ => {
+      val x1 =
+        BigDecimal(x).setScale(10, BigDecimal.RoundingMode.HALF_UP).toDouble
+      "%s".formatLocal(Locale.ROOT, x1)
+    }
+  }
 }
