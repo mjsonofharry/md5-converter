@@ -11,7 +11,8 @@ case class Bone(
     name: String,
     bindpos: List[Double],
     bindmat: List[Double],
-    parent: Option[String]
+    parent: Option[String],
+    generated: Boolean
 ) {
   def reroot(rootName: String): Bone =
     this.copy(
@@ -29,14 +30,15 @@ object Bone {
     parent <- { keyValue("parent", inQuotes) <~ char('}') map (Some(_)) } | {
       char('}') >| Option.empty[String]
     }
-  } yield Bone(index, name, bindpos, bindmat, parent)
+  } yield Bone(index, name, bindpos, bindmat, parent, false)
 
   def apply(name: String): Bone = Bone(
     index = 0,
     name = name,
     bindpos = List(0, 0, 0),
     bindmat = List(0, 0, 0, 0, 0, 0, 0, 0, 0),
-    parent = None
+    parent = None,
+    generated = true
   )
 
   def convert(bone: Bone, boneTable: Map[String, Int]): String =

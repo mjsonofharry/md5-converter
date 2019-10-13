@@ -75,8 +75,7 @@ object Md5Anim {
       .zipWithIndex
       .map { case ((parts: List[FramePart], i: Int)) => Frame(i, parts) }
 
-    val generatedRoot: Option[Joint] =
-      md5mesh.joints.find(_.name == Md5Mesh.ORIGIN)
+    val generatedRoot: Option[Joint] = md5mesh.joints.find(_.generated)
 
     val hierarchy: List[Hierarchy] = {
       if (generatedRoot.isDefined) List(Hierarchy(Md5Mesh.ORIGIN))

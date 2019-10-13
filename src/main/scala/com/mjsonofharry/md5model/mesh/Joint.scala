@@ -9,7 +9,8 @@ case class Joint(
     position: List[Double],
     orientation: Quaternion,
     parentIndex: Int,
-    parentName: String
+    parentName: String,
+    generated: Boolean
 )
 
 object Joint {
@@ -23,7 +24,8 @@ object Joint {
       bone.bindpos,
       orientation,
       parentIndex,
-      parentName
+      parentName,
+      bone.generated
     )
   }
 
