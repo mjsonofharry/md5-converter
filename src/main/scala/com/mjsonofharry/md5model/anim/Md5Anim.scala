@@ -43,7 +43,7 @@ object Md5Anim {
         .map {
           case (joint: Joint, channels: List[Channel]) => {
             val attributes: Map[String, List[Double]] = channels
-              .map(c => (c.attribute, Channel.spreadKeys(c, frameCount)))
+              .map(c => (c.attribute, Channel.padKeys(c)))
               .toMap
             val values: List[List[Double]] = List(
               attributes("x"),
