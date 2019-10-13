@@ -16,6 +16,8 @@ The **input directory** is a folder containing at least one md5mesh file and one
 
 To Jack Henahan ([@jhenahan](https://github.com/jhenahan)) for introducing me to parsers and helping me understand the math.
 
+To [@Arl90](https://github.com/Arl90) for extensively testing this with a variety of models.
+
 ## Notice
 
 The matrix to quaternion conversion function in [Quaternion.scala](src/main/scala/com/mjsonofharry/md5model/math/Quaternion.scala) is ported from [NiPy](https://github.com/nipy/nibabel/blob/master/nibabel/quaternions.py).
