@@ -60,7 +60,7 @@ object Channel {
     framerate = framerate,
     strings = Nil,
     range = (0, frames - 1),
-    keys = {0 until frames}.map(_ => 0.0).toList
+    keys = { 0 until frames }.map(_ => 0.0).toList
   )
 
   def padKeys(channel: Channel): List[Double] = {
