@@ -76,10 +76,10 @@ object Md5Anim {
       .map { case ((parts: List[FramePart], i: Int)) => Frame(i, parts) }
 
     val generatedRoot: Option[Joint] =
-      md5mesh.joints.find(_.name == Md5Mesh.ORIGIN_GENERATED)
+      md5mesh.joints.find(_.name == Md5Mesh.ORIGIN)
 
     val hierarchy: List[Hierarchy] = {
-      if (generatedRoot.isDefined) List(Hierarchy(Md5Mesh.ORIGIN_GENERATED))
+      if (generatedRoot.isDefined) List(Hierarchy(Md5Mesh.ORIGIN))
       else Nil
     } ++ jointFrameParts
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {

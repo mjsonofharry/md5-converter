@@ -19,7 +19,7 @@ case class Md5Mesh(
 )
 
 object Md5Mesh {
-  val ORIGIN_GENERATED = "origin_GENERATED"
+  val ORIGIN = "origin"
 
   val parser: Parser[Md5Mesh] = for {
     commandline <- string("MD5Version 6") ~ whitespaces ~> keyValue(
@@ -30,7 +30,7 @@ object Md5Mesh {
     unsafeBones <- many(Bone.parser <~ whitespaces)
     bones = unsafeBones.filter(_.parent.isEmpty) match {
       case _ :: _ :: _ => {
-        Bone(ORIGIN_GENERATED) +: unsafeBones.map(_.reroot(ORIGIN_GENERATED))
+        Bone(ORIGIN) +: unsafeBones.map(_.reroot(ORIGIN))
       }
       case _ :: Nil => unsafeBones
       case Nil      => throw new MeshConversionException("Mesh has no root bone")
