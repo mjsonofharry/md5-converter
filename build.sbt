@@ -1,6 +1,6 @@
 name := "md5-converter"
 
-version := "1.2"
+version := "1.3"
 
 scalaVersion := "2.12.8"
 
