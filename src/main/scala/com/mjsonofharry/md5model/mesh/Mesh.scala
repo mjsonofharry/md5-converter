@@ -18,7 +18,12 @@ case class Mesh(
     verts: List[Vert],
     tris: List[Tri],
     weights: List[Weight]
-)
+) {
+  def bumpJoints: Mesh =
+    this.copy(
+      weights = this.weights.map(w => w.copy(jointIndex = w.jointIndex + 1))
+    )
+}
 
 object Mesh {
   val minShaderParser: Parser[String] = for {

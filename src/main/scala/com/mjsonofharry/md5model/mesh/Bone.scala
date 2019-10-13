@@ -12,7 +12,13 @@ case class Bone(
     bindpos: List[Double],
     bindmat: List[Double],
     parent: Option[String]
-)
+) {
+  def reroot(rootName: String): Bone =
+    this.copy(
+      index = this.index + 1,
+      parent = if (this.parent.isDefined) this.parent else Some(rootName)
+    )
+}
 
 object Bone {
   val parser: Parser[Bone] = for {
@@ -24,6 +30,14 @@ object Bone {
       char('}') >| Option.empty[String]
     }
   } yield Bone(index, name, bindpos, bindmat, parent)
+
+  def apply(name: String): Bone = Bone(
+    index = 0,
+    name = name,
+    bindpos = List(0, 0, 0),
+    bindmat = List(0, 0, 0, 0, 0, 0, 0, 0, 0),
+    parent = None
+  )
 
   def convert(bone: Bone, boneTable: Map[String, Int]): String =
     Joint.convert(Joint(bone, boneTable))

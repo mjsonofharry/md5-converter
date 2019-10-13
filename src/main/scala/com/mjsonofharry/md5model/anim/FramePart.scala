@@ -14,6 +14,15 @@ case class FramePart(
 )
 
 object FramePart {
+  def apply(joint: Joint): FramePart = FramePart(
+    joint = joint,
+    flags = AttributeFlags(),
+    x = 0.0,
+    y = 0.0,
+    z = 0.0,
+    orientation = Quaternion(0, 0, 0, 0)
+  )
+
   def convert(f: FramePart): String =
     List(
       f.x,

@@ -27,14 +27,14 @@ object Md5Anim {
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val fps: Int = md5anim.channels.head.framerate.toInt
-    val frameCount: Int = md5anim.channels.map(_.endtime).max.toInt * fps
+    val frameCount: Int = { md5anim.channels.map(_.endtime).max * fps }.toInt
     val jointTable: Map[String, Joint] =
-      md5mesh.joints.map((j) => (j.name, j)).toMap
+      md5mesh.joints.map(j => (j.name, j)).toMap
     val jointChannels: List[(Joint, List[Channel])] = md5anim.channels
       .filterNot(c => Set(Bound.MIN, Bound.MAX).contains(c.jointName))
       .groupBy(_.jointName)
       .toList
-      .map((g) => (jointTable.get(g._1), g._2))
+      .map(g => (jointTable.get(g._1), g._2))
       .collect { case ((Some(joint), channels)) => (joint, channels) }
       .sortBy(_._1.index)
 
@@ -43,7 +43,7 @@ object Md5Anim {
         .map {
           case (joint: Joint, channels: List[Channel]) => {
             val attributes: Map[String, List[Double]] = channels
-              .map(c => (c.attribute, Channel.padKeys(c, frameCount)))
+              .map(c => (c.attribute, Channel.spreadKeys(c, frameCount)))
               .toMap
             val values: List[List[Double]] = List(
               attributes("x"),
@@ -75,7 +75,13 @@ object Md5Anim {
       .zipWithIndex
       .map { case ((parts: List[FramePart], i: Int)) => Frame(i, parts) }
 
-    val hierarchy: List[Hierarchy] = jointFrameParts
+    val generatedRoot: Option[Joint] =
+      md5mesh.joints.find(_.name == Md5Mesh.ORIGIN_GENERATED)
+
+    val hierarchy: List[Hierarchy] = {
+      if (generatedRoot.isDefined) List(Hierarchy(Md5Mesh.ORIGIN_GENERATED))
+      else Nil
+    } ++ jointFrameParts
       .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
         val (i: Int, others: List[Hierarchy]) = acc
         val (joint: Joint, parts: List[FramePart]) = next
@@ -84,6 +90,7 @@ object Md5Anim {
         val startIndex = if (numAttributes > 0) i else 0
         val row =
           Hierarchy(
+            joint.index,
             joint.name,
             joint.parentName,
             joint.parentIndex,
@@ -129,10 +136,16 @@ object Md5Anim {
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n")
 
     val baseFrameBlock: String = frames match {
-      case head :: _ =>
-        head.values
+      case head :: _ => {
+        val generatedRootFramePart = generatedRoot match {
+          case Some(joint) => List(FramePart(joint))
+          case None        => Nil: List[FramePart]
+        }
+        val frameParts = generatedRootFramePart ++ head.values
+        frameParts
           .map(FramePart.baseConvert)
           .mkString(start = "baseframe {\n\t", sep = "\n\t", end = "\n}\n")
+      }
       case Nil =>
         throw new AnimConversionException(
           "Could not derive any frames from the animation channels"

@@ -4,6 +4,7 @@ import com.mjsonofharry.md5model.mesh.Joint
 import com.mjsonofharry.md5model.utils.Utils._
 
 case class Hierarchy(
+    jointIndex: Int,
     jointName: String,
     parentJointName: String,
     parentJointIndex: Int,
@@ -27,6 +28,15 @@ object Hierarchy {
           }
       }
       .reduce(_ + _)
+
+  def apply(jointName: String): Hierarchy = Hierarchy(
+    jointIndex = 0,
+    jointName = jointName,
+    parentJointName = "",
+    parentJointIndex = -1,
+    flags = {1 to 6}.map(_ => false).toList,
+    startIndex = 0
+  )
 
   def convert(hierarchy: Hierarchy): String = {
     val attributes =

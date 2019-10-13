@@ -18,6 +18,8 @@ object AttributeFlags {
     val List(x, y, z, qx, qy, qz) = values
     AttributeFlags(x, y, z, qx, qy, qz)
   }
+
+  def apply(): AttributeFlags = AttributeFlags(false, false, false, false, false, false)
 }
 
 case class Frame(index: Int, values: List[FramePart])

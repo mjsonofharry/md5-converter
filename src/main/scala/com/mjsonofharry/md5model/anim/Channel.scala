@@ -25,7 +25,9 @@ object Channel {
     starttime <- keyValue("starttime", double)
     endtime <- keyValue("endtime", double)
     framerate <- keyValue("framerate", double)
-    strings <- { keyValue("strings", int) ~> many(inQuotes <~ whitespaces) } | { whitespaces >| List("")}
+    strings <- { keyValue("strings", int) ~> many(inQuotes <~ whitespaces) } | {
+      whitespaces >| List("")
+    }
     frames = { framerate * endtime }.toInt
     range <- { keyValue("range", { int <~ spaceChar } ~ int) } | {
       whitespaces >| (0, frames)
@@ -44,11 +46,26 @@ object Channel {
       keys
     )
 
-  def padKeys(channel: Channel, padTo: Int): List[Double] = {
+  def apply(
+      jointName: String,
+      attribute: String,
+      framerate: Double,
+      frames: Int
+  ): Channel = Channel(
+    index = -1,
+    jointName = jointName,
+    attribute = attribute,
+    starttime = 0.0,
+    endtime = framerate * frames,
+    framerate = framerate,
+    strings = Nil,
+    range = (0, frames - 1),
+    keys = {0 until frames}.map(_ => 0.0).toList
+  )
+
+  def padKeys(channel: Channel, amount: Int): List[Double] = {
     val keys = channel.keys
     val (start, finish) = channel.range
-    val prependTo = start + keys.size
-    val appendTo = finish
     val prepended = keys.reverse.padTo(start + keys.size, keys.head)
     val appended = prepended.reverse.padTo(finish, keys.last)
     appended
