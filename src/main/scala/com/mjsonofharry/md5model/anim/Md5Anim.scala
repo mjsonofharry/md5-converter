@@ -104,7 +104,7 @@ object Md5Anim {
     val boundChannels: List[(String, (String, List[Double]))] =
       md5anim.channels
         .filter(c => Set(Bound.MIN, Bound.MAX).contains(c.jointName))
-        .map(c => (c.jointName, (c.attribute, Channel.padKeys(c, frameCount))))
+        .map(c => (c.jointName, (c.attribute, Channel.padKeys(c))))
     val boundsMin = boundChannels.filter(_._1 == Bound.MIN).map(_._2).toMap
     val boundsMax = boundChannels.filter(_._1 == Bound.MAX).map(_._2).toMap
     val bounds = {

@@ -63,7 +63,7 @@ object Channel {
     keys = {0 until frames}.map(_ => 0.0).toList
   )
 
-  def padKeys(channel: Channel, amount: Int): List[Double] = {
+  def padKeys(channel: Channel): List[Double] = {
     val keys = channel.keys
     val (start, finish) = channel.range
     val prepended = keys.reverse.padTo(start + keys.size, keys.head)
