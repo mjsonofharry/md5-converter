@@ -34,7 +34,7 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
     inside(result) {
       case Done(_: String, bone: Bone) =>
         inside(bone) {
-          case Bone(index, name, bindpos, bindmat, parent) => {
+          case Bone(index, name, bindpos, bindmat, parent, false) => {
             index shouldBe 0
             name shouldBe "origin"
             val p = List(0, 0, 0)
@@ -60,7 +60,7 @@ class BoneSpec extends FlatSpec with Matchers with GivenWhenThen with Inside {
     inside(result) {
       case Done(_: String, bone: Bone) =>
         inside(bone) {
-          case Bone(index, name, bindpos, bindmat, parent) => {
+          case Bone(index, name, bindpos, bindmat, parent, false) => {
             index shouldBe 1
             name shouldBe "Body2"
             val p = List(0.217826, 0, 51.499458)
