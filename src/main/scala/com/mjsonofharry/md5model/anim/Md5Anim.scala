@@ -80,7 +80,7 @@ object Md5Anim {
     val generatedRoot: Option[Joint] = md5mesh.joints.find(_.generated)
     val hierarchy: List[Hierarchy] =
       Hierarchy.computeHierarchies(jointFrameParts, generatedRoot)
-    val bounds = Bound.computeBounds(md5anim)
+    val bounds = Bound.computeBounds(md5anim.channels)
     val baseframe: Frame = Frame.computeBaseFrame(frames, generatedRoot)
 
     val version = "MD5Version 10"

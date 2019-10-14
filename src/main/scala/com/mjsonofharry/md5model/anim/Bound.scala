@@ -20,9 +20,9 @@ object Bound {
     Bound(minX, minY, minZ, maxX, maxY, maxZ)
   }
 
-  def computeBounds(md5anim: Md5Anim): List[Bound] = {
+  def computeBounds(channels: List[Channel]): List[Bound] = {
     val boundChannels: List[(String, (String, List[Double]))] =
-      md5anim.channels
+      channels
         .filter(c => Set(Bound.MIN, Bound.MAX).contains(c.jointName))
         .map(c => (c.jointName, (c.attribute, Channel.padKeys(c))))
     val boundsMin: Map[String, List[Double]] =
