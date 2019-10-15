@@ -26,7 +26,7 @@ case class Mesh(
 }
 
 object Mesh {
-  private val root = anyChar ~ string(":/")
+  private val root = (char('P') | char('p')) ~ string(":/")
   private val doom = string("doom") | string("Doom")
   private val untilTga = manyUntil(anyChar, string(".tga"))
   val minShaderParser: Parser[String] = for {
