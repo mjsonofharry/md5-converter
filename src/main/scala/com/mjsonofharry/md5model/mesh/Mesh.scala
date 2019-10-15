@@ -26,14 +26,14 @@ case class Mesh(
 }
 
 object Mesh {
+  private val root = anyChar ~ string(":/")
+  private val doom = string("doom") | string("Doom")
+  private val untilTga = manyUntil(anyChar, string(".tga"))
   val minShaderParser: Parser[String] = for {
-    path <- string("P:/Doom/base/") ~> manyUntil(anyChar, string(".tga")) map (_.mkString)
+    path <- root ~ doom ~ string("/base/") ~> untilTga map (_.mkString)
   } yield path
   val shaderNameParser: Parser[String] = for {
-    name <- string("P:/") ~ many(manyUntil(anyChar, char('/'))) ~> manyUntil(
-      anyChar,
-      string(".tga")
-    ) map (_.mkString)
+    name <- anyChar ~ string(":/") ~ many(manyUntil(anyChar, char('/'))) ~> untilTga map (_.mkString)
   } yield name
   val parser: Parser[Mesh] = for {
     index <- keyValue("mesh", int) <~ char('{') ~ whitespaces
