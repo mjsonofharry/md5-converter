@@ -2,6 +2,7 @@
 *.log
 *.md5mesh
 *.md5anim
+*.md5camera
 *.tga
 target/
 .bloop
