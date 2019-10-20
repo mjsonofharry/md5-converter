@@ -91,17 +91,13 @@ object Md5Anim {
     val frameRate = s"frameRate ${fps}"
     val numAnimatedComponents =
       s"numAnimatedComponents ${hierarchy.flatMap(_.flags).filter(fl => fl).size}\n"
-
     val hierarchyBlock: String = hierarchy
       .map(Hierarchy.convert)
       .mkString(start = "hierarchy {\n\t", sep = "\n\t", end = "\n}\n")
-
     val boundsBlock: String = bounds
       .map(Bound.convert)
       .mkString(start = "bounds {\n\t", sep = "\n\t", end = "\n}\n")
-
     val baseFrameBlock: String = Frame.baseConvert(baseframe)
-
     val frameBlocks: String = frames.map(Frame.convert).mkString("\n\n")
 
     List(
