@@ -29,7 +29,8 @@ object Md5Anim {
 
   def mapJointsToFrameParts(
       md5mesh: Md5Mesh,
-      md5anim: Md5Anim
+      md5anim: Md5Anim,
+      skipCompression: Boolean
   ): List[JointFrameParts] = {
     val jointNameLookup: Map[String, Joint] =
       md5mesh.joints.map(j => (j.name, j)).toMap
@@ -59,7 +60,9 @@ object Md5Anim {
             List(x, y, z, q.x, q.y, q.z, q.w)
           })
           val flags: AttributeFlags =
-            AttributeFlags(values.transpose.take(6).map(_.distinct.size > 1))
+            if (skipCompression) AttributeFlags(true)
+            else
+              AttributeFlags(values.transpose.take(6).map(_.distinct.size > 1))
           val parts: List[FramePart] = values.map(components => {
             val List(x, y, z, qx, qy, qz, qw) = components
             val q = Quaternion(qw, qx, qy, qz)
@@ -70,7 +73,11 @@ object Md5Anim {
       }
   }
 
-  def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
+  def convert(
+      md5anim: Md5Anim,
+      md5mesh: Md5Mesh,
+      skipCompression: Boolean
+  ): String = {
     val fps: Int = md5anim.channels.head.framerate.toInt
     val frameCount: Int = { md5anim.channels.map(_.endtime).max * fps }.toInt
 

@@ -17,6 +17,6 @@ object AttributeFlags {
     AttributeFlags(x, y, z, qx, qy, qz)
   }
 
-  def apply(): AttributeFlags =
-    AttributeFlags(false, false, false, false, false, false)
+  def apply(value: Boolean = false): AttributeFlags =
+    AttributeFlags(value, value, value, value, value, value)
 }
