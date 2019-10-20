@@ -30,7 +30,7 @@ object Md5Anim {
   def mapJointsToFrameParts(
       md5mesh: Md5Mesh,
       md5anim: Md5Anim,
-      skipCompression: Boolean
+      skipCompression: Boolean = false
   ): List[JointFrameParts] = {
     val jointNameLookup: Map[String, Joint] =
       md5mesh.joints.map(j => (j.name, j)).toMap
@@ -82,7 +82,7 @@ object Md5Anim {
     val frameCount: Int = { md5anim.channels.map(_.endtime).max * fps }.toInt
 
     val jointFrameParts: List[JointFrameParts] =
-      mapJointsToFrameParts(md5mesh, md5anim)
+      mapJointsToFrameParts(md5mesh, md5anim, skipCompression)
     val frames: List[Frame] = Frame.computeFrames(jointFrameParts)
     val generatedRoot: Option[Joint] = md5mesh.joints.find(_.generated)
     val hierarchy: List[Hierarchy] =

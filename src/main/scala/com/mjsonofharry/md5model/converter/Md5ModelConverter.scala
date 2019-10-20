@@ -71,6 +71,9 @@ object Md5MeshConverter {
         meshOutput.write(convertedMesh)
         meshOutput.close()
 
+        val skipCompression = args.contains("--skip-compression")
+        println("Skipping animation compression")
+
         animPaths.foreach(animPath => {
           val animName: String = Paths.get(animPath).getFileName().toString()
           println(s"Converting anim: ${animName}")
@@ -79,7 +82,6 @@ object Md5MeshConverter {
           val animData = Source.fromFile(animPath).getLines.mkString
           Md5Anim.parser.parseOnly(animData) match {
             case Done(_, md5anim: Md5Anim) => {
-              val skipCompression = args.contains("--skip-compression")
               val convertedAnim: String =
                 Md5Anim.convert(md5anim, md5Mesh, skipCompression)
               val animOutput: PrintWriter =
