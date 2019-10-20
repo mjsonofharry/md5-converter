@@ -20,23 +20,26 @@ case class Md5Camera(
 )
 
 object Md5Camera {
+  val CAMERA_1 = "camera1"
   val REF = "refcam"
 
   def convert(md5anim: Md5Anim, md5mesh: Md5Mesh): String = {
     val fps: Int = md5anim.channels.head.framerate.toInt
     val frameCount: Int = { md5anim.channels.map(_.endtime).max * fps }.toInt
-    val cameraNameRef: List[String] =
+    val cameraNames: List[String] =
       md5anim.channels.find(_.jointName == REF) match {
         case Some(refcam) => {
-          val cameraNames = "camera1" +: refcam.strings.filter(
-            md5mesh.joints.map(_.name).contains
-          )
+          val cameraNames = {
+            CAMERA_1 +: refcam.strings.filter(
+              md5mesh.joints.map(_.name).contains
+            )
+          }.distinct
           Channel.padKeys(refcam).map(r => cameraNames(r.toInt))
         }
-        case None => {0 until frameCount}.toList.map(_ => "camera1")
+        case None => { 0 until frameCount }.toList.map(_ => CAMERA_1)
       }
     val cuts =
-      cameraNameRef.zipWithIndex
+      cameraNames.zipWithIndex
         .groupBy(_._1)
         .map(_._2.head)
         .toList
@@ -56,8 +59,7 @@ object Md5Camera {
         fov <- cameraFov.get(camera.name)
       } yield CameraPart(framePart, fov)
     }.groupBy(_.camera.name).toMap
-
-    val cameras: List[CameraPart] = cameraNameRef.zipWithIndex.map {
+    val cameras: List[CameraPart] = cameraNames.zipWithIndex.map {
       case (cameraName, frameIndex) => cameraParts(cameraName)(frameIndex)
     }
 
