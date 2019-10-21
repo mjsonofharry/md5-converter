@@ -79,7 +79,7 @@ object Md5Anim {
       skipCompression: Boolean
   ): String = {
     val fps: Int = md5anim.channels.head.framerate.toInt
-    val frameCount: Int = { md5anim.channels.map(_.endtime).max * fps }.toInt
+    val frameCount: Int = { md5anim.channels.map(_.range._2).max }
 
     val jointFrameParts: List[JointFrameParts] =
       mapJointsToFrameParts(md5mesh, md5anim, skipCompression)

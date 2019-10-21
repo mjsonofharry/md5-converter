@@ -72,7 +72,7 @@ object Md5MeshConverter {
         meshOutput.close()
 
         val skipCompression = args.contains("--skip-compression")
-        println("Skipping animation compression")
+        if (skipCompression) println("Skipping animation compression")
 
         animPaths.foreach(animPath => {
           val animName: String = Paths.get(animPath).getFileName().toString()
