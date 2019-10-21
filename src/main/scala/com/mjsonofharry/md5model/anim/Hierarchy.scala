@@ -1,6 +1,7 @@
 package com.mjsonofharry.md5model.anim
 
 import com.mjsonofharry.md5model.mesh.Joint
+import Md5Anim.JointFrameParts
 import com.mjsonofharry.md5model.utils.Utils._
 
 case class Hierarchy(
@@ -34,9 +35,33 @@ object Hierarchy {
     jointName = jointName,
     parentJointName = "",
     parentJointIndex = -1,
-    flags = {1 to 6}.map(_ => false).toList,
+    flags = { 1 to 6 }.map(_ => false).toList,
     startIndex = 0
   )
+
+  def computeHierarchies(
+      jointFrameParts: List[JointFrameParts],
+      generatedRoot: Option[Joint]
+  ): List[Hierarchy] =
+    generatedRoot.toList.map(joint => Hierarchy(joint.name)) ++ jointFrameParts
+      .foldLeft((0, List.empty[Hierarchy]))((acc, next) => {
+        val (i: Int, others: List[Hierarchy]) = acc
+        val (joint: Joint, parts: List[FramePart]) = next
+        val flags = parts.head.flags.values
+        val numAttributes = flags.filter(fl => fl).size
+        val startIndex = if (numAttributes > 0) i else 0
+        val row =
+          Hierarchy(
+            joint.index,
+            joint.name,
+            joint.parentName,
+            joint.parentIndex,
+            flags,
+            startIndex
+          )
+        (i + numAttributes, others :+ row)
+      })
+      ._2
 
   def convert(hierarchy: Hierarchy): String = {
     val attributes =

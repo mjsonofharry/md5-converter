@@ -11,6 +11,7 @@ import com.mjsonofharry.md5model.mesh.Md5Mesh
 import com.mjsonofharry.md5model.anim.Md5Anim
 import atto.ParseResult.Fail
 import atto.ParseResult.Partial
+import com.mjsonofharry.md5model.camera.Md5Camera
 
 final case class ConverterInputException(
     private val message: String = "",
@@ -62,13 +63,16 @@ object Md5MeshConverter {
       Paths.get(destinationPath, meshName).toString()
     val meshData: String = Source.fromFile(meshPath).getLines.mkString
     Md5Mesh.parser.parseOnly(meshData) match {
-      case Done(_, md5Mesh: Md5Mesh) => {
+      case Done(_, md5Mesh: Md5Mesh) if md5Mesh.nummeshes > 0 => {
         val convertedMesh: String = Md5Mesh.convert(md5Mesh)
         val meshOutput: PrintWriter = new PrintWriter(
           new File(meshDestinationPath)
         )
         meshOutput.write(convertedMesh)
         meshOutput.close()
+
+        val skipCompression = args.contains("--skip-compression")
+        if (skipCompression) println("Skipping animation compression")
 
         animPaths.foreach(animPath => {
           val animName: String = Paths.get(animPath).getFileName().toString()
@@ -78,7 +82,8 @@ object Md5MeshConverter {
           val animData = Source.fromFile(animPath).getLines.mkString
           Md5Anim.parser.parseOnly(animData) match {
             case Done(_, md5anim: Md5Anim) => {
-              val convertedAnim: String = Md5Anim.convert(md5anim, md5Mesh)
+              val convertedAnim: String =
+                Md5Anim.convert(md5anim, md5Mesh, skipCompression)
               val animOutput: PrintWriter =
                 new PrintWriter(new File(animDestinationPath))
               animOutput.write(convertedAnim)
@@ -95,6 +100,41 @@ object Md5MeshConverter {
           }
         })
       }
+      case Done(_, md5Mesh: Md5Mesh) =>
+        animPaths.foreach(animPath => {
+          val animName: String = Paths.get(animPath).getFileName().toString()
+          println(s"Converting anim (as camera): ${animName}")
+          val animData = Source.fromFile(animPath).getLines.mkString
+          Md5Anim.parser.parseOnly(animData) match {
+            case Done(_, md5anim: Md5Anim) => {
+              val cameraExt = ".md5camera"
+              val cameraName: String = Paths
+                .get(animPath)
+                .getFileName()
+                .toString()
+                .split('.')
+                .toList match {
+                case head :: _ => head + cameraExt
+                case Nil       => animPath + cameraExt
+              }
+              val cameraDestinationPath: String =
+                Paths.get(destinationPath, cameraName).toString()
+              val convertedCamera: String = Md5Camera.convert(md5anim, md5Mesh)
+              val cameraOutput: PrintWriter =
+                new PrintWriter(new File(cameraDestinationPath))
+              cameraOutput.write(convertedCamera)
+              cameraOutput.close
+            }
+            case Fail(input, stack, message) =>
+              throw new ConversionException(
+                s"Animation ${animName} could not be parsed: ${message}"
+              )
+            case Partial(k) =>
+              throw new ConversionException(
+                s"Animation ${animName} was only partially parsed (should error not be possible)"
+              )
+          }
+        })
       case Fail(input, stack, message) =>
         ConversionException(s"Mesh ${meshName} could not be parsed: ${message}")
       case Partial(k) =>
